@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+
+
+
+  
+  <meta content="text/html; charset=EUC-KR" http-equiv="content-type"><title>Notice</title></head><body>
+<div style="text-align: center;"><big style="color: red;"><big><big><span style="font-weight: bold;">OVERVIEW</span></big></big></big><br>
+</div>
+
+<br>
+
+<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+
+  <tbody>
+    <tr>
+      <td style="vertical-align: top; width: 10px; text-align: center;">&#8226;<br>
+      </td>
+      <td style="vertical-align: top; width: 601px;">u-blox AssistNow
+Online is provided by u-blox<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 10px; text-align: center;">&#8226;<br>
+      </td>
+      <td style="vertical-align: top; width: 601px;"><span style="color: red;"><span style="color: black;">Working with u-blox GPS modules equal or higher version than Neo-6M</span></span><span style="font-weight: bold; color: red; text-decoration: underline;"><br>
+      </span></td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 10px; text-align: center;">&#8226;<br>
+      </td>
+      <td style="vertical-align: top; width: 601px;">It reduces TTFF(Time To First Fix) by sending data&nbsp; from u-blox server required by GPS module<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 10px; text-align: center;">&#8226;<br>
+      </td>
+      <td style="vertical-align: top; width: 601px;">User position is measured by the phone<span style="color: rgb(0, 0, 153); font-weight: bold;"></span> and it is transferred to u-blox server<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<br>
+
+<br>
+
+<div style="text-align: center;"><big><big><big><span style="color: rgb(51, 102, 255); font-weight: bold;">USAGE</span><br>
+</big></big></big></div>
+
+<table style="text-align: left; width: 100%; height: 100%;" border="0" cellpadding="2" cellspacing="2">
+
+  <tbody>
+    <tr>
+      <td style="vertical-align: top; width: 23px; text-align: center;">1<br>
+      </td>
+      <td colspan="2" rowspan="1" style="vertical-align: top; width: 981px;">u-blox account and password are required to use AssistNow Online service<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 23px; text-align: center;"><br>
+      </td>
+      <td style="vertical-align: top; width: 23px; text-align: center;">&#8226;</td>
+      <td style="vertical-align: top; width: 981px;">&nbsp;Sending email without subject and body to <a href="mailto:agps-account@u-blox.com">agps-account@u-blox.com</a>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;"><br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">&#8226;</td>
+      <td style="vertical-align: top;">Email containing account and password will be arrived after a while<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;"><br>
+      </td>
+      <td style="vertical-align: top; text-align: center;">&#8226;</td>
+      <td style="vertical-align: top;">Enter account and password to above fields<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">2<br>
+      </td>
+      <td colspan="2" rowspan="1" style="vertical-align: top;">Modify protocol.cpp of MultiWii
+codes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;"><br>
+      </td>
+      <td colspan="2" rowspan="1" style="vertical-align: top; background-color: rgb(255, 255, 204);"><span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">@@
+-53,6 +54,8 @@</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;#define
+MSP_SET_SERVO_CONF&nbsp; &nbsp; &nbsp; &nbsp;212&nbsp; &nbsp;//in
+message&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Servo settings</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;#define
+MSP_SET_MOTOR&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 214&nbsp;
+&nbsp;//in message&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; PropBalance
+function</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+#define
+MSP_TX_GPS_DATA&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 215&nbsp; &nbsp;//in
+message&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AGPS injection</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;#define
+MSP_BIND&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp;240&nbsp; &nbsp;//in message&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; no
+param</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;#define
+MSP_EEPROM_WRITE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;250&nbsp; &nbsp;//in
+message&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; no param</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">@@
+-71,7 +74,7 @@</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">@@
+-79,7 +82,7 @@ static uint8_t cmdMSP[UART_NUMBER];</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;void
+evaluateOtherData(uint8_t sr);</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;#ifndef
+SUPPRESS_ALL_SERIAL_MSP</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">-void
+evaluateCommand();</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+void
+evaluateCommand(uint8_t len);</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;#endif</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;#define
+BIND_CAPABLE 0;&nbsp; //Used for Spektrum today; can be used in the
+future for any RX type that needs a bind and has a MultiWii</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">@@
+-218,7 +221,7 @@ void serialCom() {</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp;inBuf[offset[CURRENTPORT]++][CURRENTPORT] = c;</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp;} else if (c_state[CURRENTPORT] ==
+HEADER_CMD &amp;&amp; offset[CURRENTPORT] &gt;= dataSize[CURRENTPORT]) {</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;if (checksum[CURRENTPORT] == c)
+{&nbsp; // compare calculated and transferred checksum</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">-&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; evaluateCommand();&nbsp; // we got a
+valid packet, evaluate it</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+evaluateCommand(dataSize[CURRENTPORT]);&nbsp; // we got a valid packet,
+evaluate it</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;c_state[CURRENTPORT] = IDLE;</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;cc = 0; // no more than one MSP per
+port and per cycle</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">@@
+-239,10 +242,20 @@ void s_struct_w(uint8_t *cb,uint8_t siz)</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;}</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;#ifndef
+SUPPRESS_ALL_SERIAL_MSP</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">-void
+evaluateCommand() {</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+void
+evaluateCommand(uint8_t len) {</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp;uint32_t tmp=0;</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp;switch(cmdMSP[CURRENTPORT]) {</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+#if
+GPS</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+&nbsp;
+&nbsp;case MSP_TX_GPS_DATA:</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+&nbsp;
+&nbsp; &nbsp;for (uint8_t i = 0; i &lt; len; i++) {</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+&nbsp;
+&nbsp; &nbsp; &nbsp;SerialWrite(GPS_SERIAL, read8());</span><br>
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;"></span><span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+&nbsp;
+&nbsp; &nbsp;&nbsp; delay(5);</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+&nbsp;
+&nbsp; &nbsp;}</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+&nbsp;
+&nbsp; &nbsp;headSerialReply(0);</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+&nbsp;
+&nbsp; &nbsp;break;</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+#endif</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">+</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp; case MSP_SET_RAW_RC:</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp; &nbsp; s_struct_w((uint8_t*)&amp;rcSerial,16);</span><br style="margin: 0px; padding: 0px; font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px;">
+      <span style="font-family: Monaco,'Andale Mono','Courier New',Courier,mono; font-size: 12px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 15.21px; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; display: inline ! important; float: none;">&nbsp;
+&nbsp; &nbsp; rcSerialCount = 50; // 1s transition</span></td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">3<br>
+      </td>
+      <td colspan="2" rowspan="1" style="vertical-align: top;">Download the firmware after compiling codes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; text-align: center;">4<br>
+      </td>
+      <td colspan="2" rowspan="1" style="vertical-align: top;">Press "Click for injecting" button<br>
+      </td>
+    </tr><tr>
+      <td style="vertical-align: top; text-align: center;">5<br>
+      </td>
+      <td colspan="2" rowspan="1" style="vertical-align: top;">GPS will be fixed in a short time<br>
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+
+
+
+</body></html>
