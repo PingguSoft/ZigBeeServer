@@ -41,7 +41,7 @@
                     android:text="@string/zigbee_node_type"/>
 
                 <Spinner
-                    android:id="@+id/spinner_NodeType"
+                    android:id="@+id/spinnerNodeType"
                     style="android:spinnerStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -60,12 +60,35 @@
     
                 <EditText
                     android:id="@+id/editNodeName"
-                    android:layout_width="30dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:ems="5">
                 </EditText>
             </TableRow>
+            
+            <TableRow
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/zigbee_node_addr" />
+    
+                <EditText
+                    android:id="@+id/editNodeAddr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false" />
+
+            </TableRow>
+            
         </TableLayout>        
     
 <!-- ZigBee GPIO section -->        

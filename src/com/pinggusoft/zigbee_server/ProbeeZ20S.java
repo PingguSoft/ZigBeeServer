@@ -17,7 +17,20 @@ import android.text.TextUtils;
 import android.util.Log;
 
 public class ProbeeZ20S {
-    private static final String TAG = "ProbeeZ20S";
+    public static final String CMD_AT               = "at\n";
+    public static final String CMD_RESET            = "atz\n";
+    public static final String CMD_GET_NODE_TYPE    = "at+nt?\n";
+    public static final String CMD_GET_NODE_ADDR    = "at+la?\n";
+    public static final String CMD_GET_NODE_NAME    = "at+nn?\n";
+    public static final String CMD_SET_NODE_NAME    = "at+nn?\n";
+    public static final String CMD_ESCAPE_DATA      = "+++";
+    public static final String CMD_SCAN             = "at+ds\n";
+    public static final String CMD_GET_ECHO_MODE    = "ats12?\n";
+    public static final String CMD_SET_ECHO_OFF     = "ats12=0\n";
+    public static final String RESP_OK              = "OK\r";
+    public static final String RESP_ERROR           = "ERROR\r";
+    
+    
     public static final int IDLE = 0, TAIL_O = 1, TAIL_K = 2, TAIL_CR = 3, TAIL_LF = 4;
     public static final int BT_CON = 1;
     
@@ -82,7 +95,7 @@ public class ProbeeZ20S {
                 m_nCnt--;
             } else {
                 strRet = m_strAck;
-//                LogUtil.e(str + " => " + strRet);
+                LogUtil.d(str + " => " + strRet);
             }
         } finally {
             m_lockAck.unlock();
@@ -134,13 +147,29 @@ public class ProbeeZ20S {
                     splitter.setString(v);
                     while (splitter.hasNext()) {
                         String field = splitter.next();
-                        if (field.equals("OK\r") || field.equals("ERROR\r")) {
-                            try {
-                                ack(v);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                        if (field.equals(RESP_OK)) {
+                            int pos = v.lastIndexOf(RESP_OK);
+                            if (pos >= 0) {
+                                String strResp = v.substring(0, pos);
+                                try {
+                                    ack(strResp);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                byteBuf.clear();
                             }
-                            byteBuf.clear();
+                        }
+                        else if (field.equals(RESP_ERROR)) {
+                            int pos = v.lastIndexOf(RESP_ERROR);
+                            if (pos >= 0) {
+                                String strResp = v.substring(0, pos);
+                                try {
+                                    ack(strResp);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                byteBuf.clear();
+                            }
                         }
                     }
                 }
