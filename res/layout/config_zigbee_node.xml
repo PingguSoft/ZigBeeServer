@@ -124,7 +124,7 @@
                
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="1.5"
                     android:layout_height="30dp"
                     android:layout_margin="1dp"
                     android:background="#FFFFFFFF"
@@ -134,14 +134,14 @@
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="1.5"
                     android:layout_height="30dp"
                     android:layout_margin="1dp"
                     android:background="#FFFFFFFF"
                     android:gravity="center"
                     android:textStyle="bold"
                     android:text="@string/zigbee_gpio_pin"/>
-
+<!-- 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="3.5"
@@ -151,20 +151,20 @@
                     android:gravity="center"
                     android:textStyle="bold"
                     android:text="@string/zigbee_gpio_mode"/>
-
+ -->
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_weight="3"
                     android:layout_height="30dp"
                     android:layout_margin="1dp"
                     android:background="#FFFFFFFF"
                     android:gravity="center"
                     android:textStyle="bold"
-                    android:text="@string/zigbee_gpio_use"/>
+                    android:text="@string/zigbee_gpio_usage"/>
                 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="3.5"
+                    android:layout_weight="4"
                     android:layout_height="30dp"
                     android:layout_margin="1dp"
                     android:background="#FFFFFFFF"

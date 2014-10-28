@@ -64,7 +64,7 @@
     <string name="zigbee_gpio_pin">PIN</string>
     <string name="zigbee_gpio_mode">MODE</string>
     <string name="zigbee_gpio_name">NAME</string>
-    <string name="zigbee_gpio_use">USE</string>
+    <string name="zigbee_gpio_usage">USAGE</string>
     
     <!--  TTS -->
     <string name="tts_data_err">"데이터 전송 에러"</string>

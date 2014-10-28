@@ -8,7 +8,7 @@
         <TextView
             android:id="@+id/text_zigbee_gpio_no"
             android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_weight="1.5"
             android:layout_height="35dp"
             android:layout_margin="1dp"
             android:background="#FFFFFFFF"
@@ -18,13 +18,13 @@
         <TextView
             android:id="@+id/text_zigbee_gpio_pin"
             android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_weight="1.5"
             android:layout_height="35dp"
             android:layout_margin="1dp"
             android:background="#FFFFFFFF"
             android:gravity="center"
             android:text="4"/>
-
+<!-- 
         <Spinner
             android:id="@+id/spinnerGpioMode"
             style="android:spinnerStyle"
@@ -39,7 +39,7 @@
             android:drawSelectorOnTop="true"
             android:entries="@array/zigbee_gpio_mode"
             android:gravity="center" />
-        
+ -->        
         <Spinner
             android:id="@+id/spinnerGpioUsage"
             style="android:spinnerStyle"
@@ -49,7 +49,7 @@
             android:layout_marginBottom="1dp"
             android:layout_marginLeft="1dp"
             android:layout_marginRight="1dp"
-            android:layout_weight="1"
+            android:layout_weight="3"
             android:background="#FFFFFFFF"
             android:drawSelectorOnTop="true"
             android:entries="@array/zigbee_gpio_usage"
@@ -58,7 +58,7 @@
         <EditText
             android:id="@+id/editZigbeeGpioName"
             android:layout_width="0dp"
-            android:layout_weight="3.5"
+            android:layout_weight="4"
             android:layout_height="35dp"
             android:layout_marginTop="3dp"
             android:layout_marginBottom="1dp"

@@ -38,7 +38,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
     private String        mStrLocalAddr = null;
     private String        mStrRemoteAddr = null;
     private ProbeeHandler mProbeeCallback = new ProbeeHandler(this);
-    private Spinner       mSpinnerMode[];
+//    private Spinner       mSpinnerMode[];
     private Spinner       mSpinnerUsage[];
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
     private ZigBeeNode  mNode = null;
@@ -48,10 +48,14 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
      * 
      ***************************************************************************
      */
-    
-    
-    public class SpinnerAdapter extends ArrayAdapter<String>{
-        int    nResImages[] = { R.drawable.type_cross_32, R.drawable.type_bulb_32, R.drawable.type_status_32, R.drawable.type_doorlock_32,  R.drawable.type_therm_32 };
+
+    private class SpinnerAdapter extends ArrayAdapter<String>{
+        int    nResImages[] = { R.drawable.type_cross_32,
+                                R.drawable.type_status_32,
+                                R.drawable.type_light_32,
+                                R.drawable.type_switch_32, 
+                                R.drawable.type_adc_32,
+                                R.drawable.type_reserved_32 };
         String strUsages[] = null;
         
         public SpinnerAdapter(Context context, int textViewResourceId, String[] objects) {
@@ -72,7 +76,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         public View getCustomView(int position, View convertView, ViewGroup parent) {
  
             LayoutInflater inflater=getLayoutInflater();
-            View row=inflater.inflate(R.layout.spinner_row, parent, false);
+            View row=inflater.inflate(R.layout.config_zigbee_spin_row, parent, false);
             TextView label=(TextView)row.findViewById(R.id.textMode);
             label.setText(strUsages[position]);
  
@@ -90,7 +94,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
       
         mApp     = (BTConApp)getApplication();
         mProbee  = new ProbeeZ20S(mApp, mProbeeCallback);
-        mSpinnerMode  = new Spinner[ZigBeeNode.GPIO_CNT];
+//        mSpinnerMode  = new Spinner[ZigBeeNode.GPIO_CNT];
         mSpinnerUsage = new Spinner[ZigBeeNode.GPIO_CNT];
         
         TableLayout tbl = (TableLayout)findViewById(R.id.container_zigbee_gpio);
@@ -104,10 +108,10 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
             if (tvPIN != null)
                 tvPIN.setText(String.format("%d", ZigBeeNode.getPinNo(i)));
 
-            mSpinnerMode[i] = (Spinner)row.findViewById(R.id.spinnerGpioMode);
+//            mSpinnerMode[i] = (Spinner)row.findViewById(R.id.spinnerGpioMode);
             
             mSpinnerUsage[i] = (Spinner)row.findViewById(R.id.spinnerGpioUsage);
-            mSpinnerUsage[i].setAdapter(new SpinnerAdapter(this, R.layout.spinner_row, getResources().getStringArray(R.array.zigbee_gpio_usage)));
+            mSpinnerUsage[i].setAdapter(new SpinnerAdapter(this, R.layout.config_zigbee_spin_row, getResources().getStringArray(R.array.zigbee_gpio_usage)));
             tbl.addView(row);
         }
         tbl.requestLayout();
@@ -195,7 +199,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         mNode.setName(((TextView)findViewById(R.id.editNodeName)).getText().toString());
         mNode.setType(((Spinner)findViewById(R.id.spinnerNodeType)).getSelectedItemPosition());
         for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-            int mode = mSpinnerMode[i].getSelectedItemPosition();
+            int mode = mSpinnerUsage[i].getSelectedItemPosition();
             mNode.setGpioMode(i, mode);
         }
         mNode.writeInfo();
@@ -287,7 +291,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
                 ((TextView)parent.findViewById(R.id.editNodeName)).setText(info.getName());
                 ((Spinner)parent.findViewById(R.id.spinnerNodeType)).setSelection(info.getType());
                 for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-                    parent.mSpinnerMode[i].setSelection(info.getGpioMode(i));
+                    parent.mSpinnerUsage[i].setSelection(info.getGpioMode(i));
                 }
                 break;
 
