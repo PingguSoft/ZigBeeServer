@@ -63,7 +63,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:ems="5">
+                    android:ems="5"
+                    android:inputType="textCapCharacters"
+                    android:maxLength="16"
+                    android:minLines="1" >
+
                 </EditText>
             </TableRow>
             
@@ -107,8 +111,8 @@
             android:id="@+id/container_zigbee_gpio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp"
             android:background="#BBBBBB"
@@ -120,7 +124,7 @@
                
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="2.5"
+                    android:layout_weight="1"
                     android:layout_height="30dp"
                     android:layout_margin="1dp"
                     android:background="#FFFFFFFF"
@@ -130,23 +134,44 @@
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="2.5"
+                    android:layout_weight="1"
                     android:layout_height="30dp"
                     android:layout_margin="1dp"
                     android:background="#FFFFFFFF"
                     android:gravity="center"
                     android:textStyle="bold"
                     android:text="@string/zigbee_gpio_pin"/>
-                
+
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="5"
+                    android:layout_weight="3.5"
                     android:layout_height="30dp"
                     android:layout_margin="1dp"
                     android:background="#FFFFFFFF"
                     android:gravity="center"
                     android:textStyle="bold"
                     android:text="@string/zigbee_gpio_mode"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="30dp"
+                    android:layout_margin="1dp"
+                    android:background="#FFFFFFFF"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:text="@string/zigbee_gpio_use"/>
+                
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="3.5"
+                    android:layout_height="30dp"
+                    android:layout_margin="1dp"
+                    android:background="#FFFFFFFF"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:text="@string/zigbee_gpio_name"/>
+                
             </TableRow>
         </TableLayout>
     </LinearLayout>

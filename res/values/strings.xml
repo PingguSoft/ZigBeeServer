@@ -19,10 +19,10 @@
    
     <!-- main -->
     <string name="main_btcon_config_section">Settings</string>
-    <string name="main_btcon_config">BTCon Settings</string>
-    <string name="main_btcon_config_desc">Configure application settings</string>
-    <string name="main_multiwii_config">MultiWii Settings</string>
-    <string name="main_multiwii_config_desc">Configure MultiWii parameters</string>
+    <string name="main_server_config">BTCon Settings</string>
+    <string name="main_server_config_desc">Configure application settings</string>
+    <string name="main_device_config">MultiWii Settings</string>
+    <string name="main_device_config_desc">Configure MultiWii parameters</string>
     <string name="main_agps_config">u-blox AssistNow Online</string>
     <string name="main_agps_config_desc">Injecting AGPS data to u-blox GPS module</string>
 
@@ -34,7 +34,7 @@
 
     <string name="main_bt_robot_controller">Robot Controller</string>
 
-    <string name="main_bt_etc_section">ETCs</string>
+    <string name="main_etc_section">ETCs</string>
     <string name="main_purchase">Purchase</string>
     <string name="main_purchase_desc">Purchasing application</string>
     <string name="main_notice">Notice</string>

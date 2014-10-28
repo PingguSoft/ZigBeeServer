@@ -20,13 +20,18 @@ public class ProbeeZ20S {
     public static final String CMD_AT               = "at\n";
     public static final String CMD_RESET            = "atz\n";
     public static final String CMD_GET_NODE_TYPE    = "at+nt?\n";
+    public static final String CMD_SET_NODE_TYPE    = "at+nt=%d\n";
     public static final String CMD_GET_NODE_ADDR    = "at+la?\n";
     public static final String CMD_GET_NODE_NAME    = "at+nn?\n";
-    public static final String CMD_SET_NODE_NAME    = "at+nn?\n";
+    public static final String CMD_SET_NODE_NAME    = "at+nn=%s\n";
+    public static final String CMD_GET_GPIO_MODE    = "at+gpio?\n";
+    public static final String CMD_SET_GPIO_MODE    = "at+gpio=%s\n";
+    public static final String CMD_REMOTE           = "at+rc=%s,%s";
     public static final String CMD_ESCAPE_DATA      = "+++";
     public static final String CMD_SCAN             = "at+ds\n";
     public static final String CMD_GET_ECHO_MODE    = "ats12?\n";
-    public static final String CMD_SET_ECHO_OFF     = "ats12=0\n";
+    public static final String CMD_SET_ECHO_MODE    = "ats12=%s\n";
+    public static final String CMD_SET_JOIN_TIME    = "at+pj=%d\n";
     public static final String RESP_OK              = "OK\r";
     public static final String RESP_ERROR           = "ERROR\r";
     
@@ -61,6 +66,10 @@ public class ProbeeZ20S {
         m_BTSerial.changeHandler(mBTHandler);
     }
 
+    public Handler getCallBack() {
+        return m_hCallback;
+    }
+    
     public void pause() {
 
     }
@@ -79,7 +88,7 @@ public class ProbeeZ20S {
         m_BTSerial.connect(device);
     }
 
-    public String writeATCmd(String str, final int time) throws InterruptedException {
+    public String writeATCmd2(String str, final int time) throws InterruptedException {
         if (!m_boolConnected)
             return null;
         
@@ -95,12 +104,53 @@ public class ProbeeZ20S {
                 m_nCnt--;
             } else {
                 strRet = m_strAck;
-                LogUtil.d(str + " => " + strRet);
+                str = str.replace("\n", " => ");
+                LogUtil.d(str + strRet);
             }
         } finally {
             m_lockAck.unlock();
         }
         return strRet;
+    }
+    
+    public String writeATCmd(String strCmd, int nStart, int nEnd, int timeout) {
+        String str = null;
+        try {
+            str = writeATCmd2(strCmd, timeout);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        if (str != null) {
+            int pos = str.lastIndexOf("\r");
+            if (pos >= 0) {
+                if (nStart == -1)
+                    nStart = 0;
+                if (nEnd == -1 || nEnd > pos)
+                    nEnd = pos;
+                str = str.substring(nStart, nEnd);
+            }
+        }
+        return str;
+    }
+    
+    public String writeATCmd(String strCmd, int timeout) {
+        String str = null;
+        try {
+            str = writeATCmd2(strCmd, timeout);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        if (str != null) {
+            int pos = str.lastIndexOf("\r");
+            if (pos >= 0) {
+                str = str.substring(0, pos);
+            }
+        }
+        return str;
     }
     
     private void ack(String str) throws InterruptedException {
@@ -109,6 +159,20 @@ public class ProbeeZ20S {
             if (m_nCnt > 0) {
                 m_nCnt--;
                 m_strAck = str;
+                m_condAck.signal();
+            }
+        } finally {
+            m_lockAck.unlock();
+        }
+    }
+    
+    private void nack() throws InterruptedException {
+        m_lockAck.lock();
+        m_strAck = null;
+        try {
+            if (m_nCnt > 0) {
+                m_nCnt--;
+                m_strAck = null;
                 m_condAck.signal();
             }
         } finally {
@@ -162,9 +226,9 @@ public class ProbeeZ20S {
                         else if (field.equals(RESP_ERROR)) {
                             int pos = v.lastIndexOf(RESP_ERROR);
                             if (pos >= 0) {
-                                String strResp = v.substring(0, pos);
+                                //String strResp = v.substring(0, pos);
                                 try {
-                                    ack(strResp);
+                                    nack();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -247,4 +311,22 @@ public class ProbeeZ20S {
             }            
         }
     }
+    
+    public static String byteArrayToHex(byte[] a, int size) {
+        StringBuilder sb = new StringBuilder(a.length * 3);
+        int c = 0;
+        for(byte b: a) {
+            if (++c > size)
+                   break;
+           sb.append(String.format("%02x ", b & 0xff));
+        }
+        sb.append(" => ");
+        c = 0;
+        for(byte b: a) {
+            if (++c > size)
+                   break;
+           sb.append(String.format("%c", b & 0xff));
+        }
+        return sb.toString();
+     }
 }

@@ -40,18 +40,14 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-
     
 public class ActivityMain extends Activity {
     private final static String TAG = "ActivityMain";
     private static final int RC_REQUEST = 10001;
     private static final String SKU_PRODUCT = "com.pinggusoft.btcon";
     
-    private static final int ID_SETTING          = 0x00;
-    private static final int ID_MULTIWII_SETTING = 0x01;
-    private static final int ID_AGPS_INJECTION   = 0x02;
-    private static final int ID_CONTROLLER       = 0x03;
-    private static final int ID_STATION          = 0x04;
+    private static final int ID_SERVER_SETTING   = 0x00;
+    private static final int ID_DEVICE_SETTING   = 0x01;
     private static final int ID_PURCHASE         = 0x05;
     private static final int ID_NOTICE           = 0x06;
     private static final int ID_QUIT             = 0x07;
@@ -76,20 +72,12 @@ public class ActivityMain extends Activity {
         mListView = (ListView)findViewById(R.id.listView);
         
         items.add(new SectionItem(getString(R.string.main_btcon_config_section)));
-        items.add(new EntryItem(R.drawable.icon_settings, getString(R.string.main_btcon_config), 
-                getString(R.string.main_btcon_config_desc), ID_SETTING));
-        items.add(new EntryItem(R.drawable.icon_multiwii, getString(R.string.main_multiwii_config), 
-                getString(R.string.main_multiwii_config_desc), ID_MULTIWII_SETTING));
-        items.add(new EntryItem(R.drawable.icon_satellite, getString(R.string.main_agps_config), 
-                getString(R.string.main_agps_config_desc), ID_AGPS_INJECTION));
-
-        items.add(new SectionItem(getString(R.string.main_bt_controller_section)));
-        items.add(new EntryItem(R.drawable.icon_stick, getString(R.string.main_bt_controller), 
-                getString(R.string.main_bt_controller_desc), ID_CONTROLLER));
-        items.add(new EntryItem(R.drawable.icon_station, getString(R.string.main_bt_station), 
-                getString(R.string.main_bt_station_desc), ID_STATION));
+        items.add(new EntryItem(R.drawable.icon_settings, getString(R.string.main_server_config), 
+                getString(R.string.main_server_config_desc), ID_SERVER_SETTING));
+        items.add(new EntryItem(R.drawable.icon_multiwii, getString(R.string.main_device_config), 
+                getString(R.string.main_device_config_desc), ID_DEVICE_SETTING));
         
-        items.add(new SectionItem(getString(R.string.main_bt_etc_section)));
+        items.add(new SectionItem(getString(R.string.main_etc_section)));
         mPurchaseItem = new EntryItem(R.drawable.icon_purchase, getString(R.string.main_purchase), 
                 getString(R.string.main_purchase_desc), ID_PURCHASE); 
         items.add(mPurchaseItem);
@@ -117,20 +105,12 @@ public class ActivityMain extends Activity {
                     }
 
                     switch (item.id) {
-                    case ID_SETTING:
-                        onClickBTConConfig(null);
+                    case ID_SERVER_SETTING:
+                        onClickServerConfig(null);
                         break;
                         
-                    case ID_MULTIWII_SETTING:
-                        break;
-                        
-                    case ID_AGPS_INJECTION:
-                        break;
-                        
-                    case ID_CONTROLLER:
-                        break;
-                        
-                    case ID_STATION:
+                    case ID_DEVICE_SETTING:
+                        onClickDeviceConfig(null);
                         break;
                         
                     case ID_PURCHASE:
@@ -250,46 +230,23 @@ public class ActivityMain extends Activity {
         }
     }
 
-    public void onClickBTConConfig(View v) {
-        Intent intent = new Intent(this, ActivityOption.class);
+    public void onClickServerConfig(View v) {
+        Intent intent = new Intent(this, ActivityServerConfig.class);
+        startActivity(intent);
+    }
+    
+    public void onClickDeviceConfig(View v) {
+        Intent intent = new Intent(this, ActivityDeviceConfig.class);
         startActivity(intent);
     }
     
     private Dialog mDialog = null;
-    
-/*    
-    private View addLogs(String strLogs[]) {
-        final View viewCont = getLayoutInflater().inflate(R.layout.main_about_cont, null);
-        TextView tvVersion = (TextView)viewCont.findViewById(R.id.textViewVersion);
-        TableLayout tbl    = (TableLayout)viewCont.findViewById(R.id.tableLogs);
-        tvVersion.setText(strLogs[0]);
-
-        for (int i = 1; i < strLogs.length; i++) {
-            final TableRow row  = (TableRow) getLayoutInflater().inflate(R.layout.main_about_cont_row, null);
-            TextView tvLog = (TextView)row.findViewById(R.id.textViewLog);
-            tvLog.setText(strLogs[i]);
-            tbl.addView(row);
-        }
-        tbl.requestLayout();
-        
-        return viewCont;
-    }
-*/    
-    
     public void onClickNotice(View v) {
         mDialog = new Dialog(this);
         mDialog.setTitle(R.string.main_notice);
         mDialog.setContentView(R.layout.main_notice);
         mDialog.setCancelable(false);
-/*        
-        final LinearLayout viewContainer = (LinearLayout)mDialog.findViewById(R.id.contContainer);
-        for (int i = R.array.log_latest; i <= R.array.log_first; i++) {
-            String logs[] = getResources().getStringArray(i);
-            if (logs != null && logs.length != 0)
-                viewContainer.addView(addLogs(logs));
-        }
-        viewContainer.requestLayout();
-*/
+
         final WebView view = (WebView)mDialog.findViewById(R.id.webView);
         
         String strURL;
@@ -516,9 +473,7 @@ public class ActivityMain extends Activity {
             }
         }
         
-        setEnableItemById(ID_MULTIWII_SETTING, boolEnable);
-        setEnableItemById(ID_CONTROLLER, boolEnable);
-        setEnableItemById(ID_STATION, boolEnable);
+        setEnableItemById(ID_DEVICE_SETTING, boolEnable);
         if (mListView != null) {
             EntryAdapter adapter = (EntryAdapter)mListView.getAdapter();
             if (adapter != null)

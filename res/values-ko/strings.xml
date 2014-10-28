@@ -16,25 +16,14 @@
     <string name="none_paired">No devices have been paired</string>
     <string name="none_found">아무 장치가 없습니다</string>
 
-
     <!-- main -->
     <string name="main_btcon_config_section">설  정</string>
-    <string name="main_btcon_config">옵션 설정</string>
-    <string name="main_btcon_config_desc">어플리케이션 옵션을 설정합니다</string>
-    <string name="main_multiwii_config">MultiWii 설정</string>
-    <string name="main_multiwii_config_desc">MultiWii Parameter를 설정합니다</string>
-    <string name="main_agps_config">u-blox AssistNow Online</string>
-    <string name="main_agps_config_desc">u-blox GPS 모듈에 AGPS정보를 전송합니다</string>
+    <string name="main_server_config">서버 설정</string>
+    <string name="main_server_config_desc">서버 어플리케이션 환경을 설정합니다</string>
+    <string name="main_device_config">원격 디바이스 설정</string>
+    <string name="main_device_config_desc">원격 디바이스를 설정합니다</string>
     
-    <string name="main_bt_controller_section">조종기 및  스테이션</string>
-    <string name="main_bt_controller">조종기 화면</string>
-    <string name="main_bt_controller_desc">조종기 화면으로 전환합니다</string>
-    <string name="main_bt_station">스테이션 화면</string>
-    <string name="main_bt_station_desc">스테이션 화면으로 전환합니다</string>
-    
-    <string name="main_bt_robot_controller">로봇 조종기</string>
-    
-    <string name="main_bt_etc_section">기  타</string>
+    <string name="main_etc_section">기  타</string>
     <string name="main_purchase">구  매</string>
     <string name="main_purchase_desc">어플리케이션을 구매합니다</string>
     <string name="main_notice">알  림</string>
@@ -54,14 +43,9 @@
     <string name="config_selBT">Bluetooth 장치 선택</string>
     <string name="config_zigbee">ZigBee 설정</string>
     <string name="config_sel_zigbee">ZigBee 장치 선택</string>
-    <string name="config_com_test">통신 테스트</string>
-    <string name="config_cell">배터리 Cell 선택</string>
-    <string name="config_sensor_sensitivity">센서 민감도</string>
-    <string name="config_zigbee_devices">검색된 ZigBee 장치</string>
+    <string name="config_zigbee_devices">ZigBee 디바이스</string>
     <string name="config_zigbee_scan">스캔</string>
-    <string name="config_mode">모드</string>
-    <string name="config_mode_controller">조종기</string>
-    <string name="config_mode_station">스테이션 (모니터링)</string>
+
     
     <!-- Bluetooth Config -->
     <string name="bt_config_paired_devices">Paring된 장치</string>
@@ -76,10 +60,11 @@
     <string name="zigbee_node_type">노드 타입</string>
     <string name="zigbee_node_addr">노드 주소</string>
     <string name="zigbee_gpio">ZigBee GPIO 설정</string>
-    <string name="zigbee_gpio_no">GPIO 번호</string>
-    <string name="zigbee_gpio_pin">PIN 번호</string>
-    <string name="zigbee_gpio_mode">GPIO 모드</string>
-
+    <string name="zigbee_gpio_no">GPIO</string>
+    <string name="zigbee_gpio_pin">PIN</string>
+    <string name="zigbee_gpio_mode">MODE</string>
+    <string name="zigbee_gpio_name">NAME</string>
+    <string name="zigbee_gpio_use">USE</string>
     
     <!--  TTS -->
     <string name="tts_data_err">"데이터 전송 에러"</string>

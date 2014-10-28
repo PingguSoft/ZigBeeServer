@@ -42,14 +42,14 @@
                   android:label="@string/config_bt_zigbee_combo">
         </activity>
         
-        <activity android:name="com.pinggusoft.zigbee_server.ActivityZigBeeConfig"
-                  android:label="@string/config_zigbee">
+        
+        <activity android:name="com.pinggusoft.zigbee_server.ActivityDeviceConfig"
+                  android:label="@string/main_device_config">
         </activity>
         
-        <activity android:name="com.pinggusoft.zigbee_server.ActivityOption"
-                  android:label="@string/main_btcon_config">
+        <activity android:name="com.pinggusoft.zigbee_server.ActivityServerConfig"
+                  android:label="@string/main_server_config">
         </activity>
-
       
         <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyAr1SFPHWitLr1Qi-67MnZJ3jjIru4X5Q0"/>
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
