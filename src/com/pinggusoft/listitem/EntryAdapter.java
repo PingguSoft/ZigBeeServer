@@ -94,7 +94,7 @@ public class EntryAdapter extends ArrayAdapter<Item> {
 				}
 
 				if (allCheckSel && position == itemFocused) {
-					v.setBackgroundColor(context.getResources().getColor(R.color.ListFocused));
+					v.setBackgroundColor(context.getResources().getColor(R.color.focused));
 				}
 				
 				final TextView title = (TextView)v.findViewById(R.id.list_item_entry_title);

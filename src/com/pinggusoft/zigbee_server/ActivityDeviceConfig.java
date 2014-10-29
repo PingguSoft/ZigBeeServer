@@ -26,22 +26,20 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import com.pinggusoft.zigbee_server.BTConApp;
+import com.pinggusoft.zigbee_server.ZigBeeServerApp;
 import com.pinggusoft.zigbee_server.R;
 
 
 public class ActivityDeviceConfig extends Activity  implements OnItemClickListener {
     private final static int    SCAN_DONE     = ZigBeeNode.CB_LAST;
   
-    private BTConApp      mApp;
-    private ProbeeZ20S    mProbee = null;
-    private String        mStrLocalAddr = null;
-    private String        mStrRemoteAddr = null;
-    private ProbeeHandler mProbeeCallback = new ProbeeHandler(this);
-//    private Spinner       mSpinnerMode[];
-    private Spinner       mSpinnerUsage[];
+    private ZigBeeServerApp  mApp;
+    private String          mStrLocalAddr = null;
+    private String          mStrRemoteAddr = null;
+    private ProbeeHandler   mProbeeCallback = new ProbeeHandler(this);
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
-    private ZigBeeNode  mNode = null;
+    private ZigBeeNode      mNode = null;
+    private CommonUtils     mCommon = null;
     
     /*
      ***************************************************************************
@@ -49,84 +47,25 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
      ***************************************************************************
      */
 
-    private class SpinnerAdapter extends ArrayAdapter<String>{
-        int    nResImages[] = { R.drawable.type_cross_32,
-                                R.drawable.type_status_32,
-                                R.drawable.type_light_32,
-                                R.drawable.type_switch_32, 
-                                R.drawable.type_adc_32,
-                                R.drawable.type_reserved_32 };
-        String strUsages[] = null;
-        
-        public SpinnerAdapter(Context context, int textViewResourceId, String[] objects) {
-            super(context, textViewResourceId, objects);
-            strUsages = getResources().getStringArray(R.array.zigbee_gpio_usage);
-        }
- 
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            return getCustomView(position, convertView, parent);
-        }
- 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            return getCustomView(position, convertView, parent);
-        }
- 
-        public View getCustomView(int position, View convertView, ViewGroup parent) {
- 
-            LayoutInflater inflater=getLayoutInflater();
-            View row=inflater.inflate(R.layout.config_zigbee_spin_row, parent, false);
-            TextView label=(TextView)row.findViewById(R.id.textMode);
-            label.setText(strUsages[position]);
- 
-            ImageView icon=(ImageView)row.findViewById(R.id.imageMode);
-            icon.setImageResource(nResImages[position]);
- 
-            return row;
-        }
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.config_device);
       
-        mApp     = (BTConApp)getApplication();
-        mProbee  = new ProbeeZ20S(mApp, mProbeeCallback);
-//        mSpinnerMode  = new Spinner[ZigBeeNode.GPIO_CNT];
-        mSpinnerUsage = new Spinner[ZigBeeNode.GPIO_CNT];
+        mApp    = (ZigBeeServerApp)getApplication();
+        mCommon = new CommonUtils(this, mProbeeCallback);
+       
+        mApp.updateNode(mCommon.getProbee());
         
-        TableLayout tbl = (TableLayout)findViewById(R.id.container_zigbee_gpio);
-        for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-            TableRow row = (TableRow)LayoutInflater.from(this).inflate(R.layout.config_zigbee_gpio_row, null);
-            TextView tvNo = (TextView)row.findViewById(R.id.text_zigbee_gpio_no);
-            if (tvNo != null)
-                tvNo.setText(String.format("%d", i));
-            
-            TextView tvPIN = (TextView)row.findViewById(R.id.text_zigbee_gpio_pin);
-            if (tvPIN != null)
-                tvPIN.setText(String.format("%d", ZigBeeNode.getPinNo(i)));
-
-//            mSpinnerMode[i] = (Spinner)row.findViewById(R.id.spinnerGpioMode);
-            
-            mSpinnerUsage[i] = (Spinner)row.findViewById(R.id.spinnerGpioUsage);
-            mSpinnerUsage[i].setAdapter(new SpinnerAdapter(this, R.layout.config_zigbee_spin_row, getResources().getStringArray(R.array.zigbee_gpio_usage)));
-            tbl.addView(row);
-        }
-        tbl.requestLayout();
-        
+        mCommon.createGpioTable();
         mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.config_bluetooth_device_name);
         ListView newDevicesListView = (ListView) findViewById(R.id.scanned_devices);
         newDevicesListView.setAdapter(mNewDevicesArrayAdapter);
         newDevicesListView.setOnItemClickListener(this);
-        findViewById(R.id.button_search).setEnabled(false);
+        findViewById(R.id.buttonSearch).setEnabled(false);
+        findViewById(R.id.buttonWriteNode).setEnabled(false);
         
-        if (mApp.m_strBTDevice != null && mApp.m_strBTDevice.length() >= 17) {
-            String strBTMac = mApp.m_strBTDevice.substring(mApp.m_strBTDevice.length() - 17);
-            BluetoothDevice device =  BluetoothAdapter.getDefaultAdapter().getRemoteDevice(strBTMac);
-            mProbee.connect(device);
-        }
+        mCommon.connect();
     }
     
     @Override
@@ -138,7 +77,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
     public synchronized void onResume() {
         super.onResume();
         
-        if (BTConApp.isAboveICS()) {
+        if (ZigBeeServerApp.isAboveICS()) {
             ActionBar bar = getActionBar();
             bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#222222")));
             int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
@@ -156,8 +95,8 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mProbee != null)
-            mProbee.stop();
+        mCommon.stop();
+        mApp.save();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -177,6 +116,9 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         mStrRemoteAddr = info.substring(nPos + 1);
         LogUtil.d("SEL:" + mStrRemoteAddr);
         onClickReadNode(null);
+        
+        if (!findViewById(R.id.buttonWriteNode).isEnabled())
+            findViewById(R.id.buttonWriteNode).setEnabled(true);
     }
     
     
@@ -187,9 +129,9 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
     */
     public void onClickReadNode(View v) {
         if (mNode == null)
-            mNode = new ZigBeeNode(mProbee, mStrRemoteAddr);
-        
-        mNode.readInfo();
+            mNode = new ZigBeeNode(mCommon.getProbee(), mStrRemoteAddr);
+       
+        mNode.asyncReadInfo();
     }
     
     public void onClickWriteNode(View v) {
@@ -199,14 +141,16 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         mNode.setName(((TextView)findViewById(R.id.editNodeName)).getText().toString());
         mNode.setType(((Spinner)findViewById(R.id.spinnerNodeType)).getSelectedItemPosition());
         for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-            int mode = mSpinnerUsage[i].getSelectedItemPosition();
+            int mode = mCommon.getSpinnerUsages()[i].getSelectedItemPosition();
             mNode.setGpioMode(i, mode);
+            mNode.setGpioName(i, mCommon.getEditGpioNames()[i].getText().toString());
         }
-        mNode.writeInfo();
+        mApp.addNode(mNode, false);
+        mNode.asyncWriteInfo();
     }
 
     public void onClickScan(final View v) {
-        if (!mProbee.isConnected())
+        if (!mCommon.getProbee().isConnected())
             return;
 
         mNewDevicesArrayAdapter.clear();
@@ -218,28 +162,28 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
             public void run() {
                 String str = null;
                 
-                str = mProbee.writeATCmd(ProbeeZ20S.CMD_AT, 500);
-                str = mProbee.writeATCmd(ProbeeZ20S.CMD_AT, 500);
+                str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_AT, 500);
+                str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_AT, 500);
                 
                 if (str == null) {    /// data mode
                     for (int i = 0; i < 5; i++) {
-                        str = mProbee.writeATCmd(ProbeeZ20S.CMD_ESCAPE_DATA, 1000);
+                        str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_ESCAPE_DATA, 1000);
                         if (str != null)
                             break;
                     }
                 }
 
-                str = mProbee.writeATCmd(ProbeeZ20S.CMD_GET_ECHO_MODE, 0, 1, 500);
+                str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_GET_ECHO_MODE, 0, 1, 500);
                 LogUtil.e("echo=" + str);
                 if (!str.startsWith("0")) {
-                    str = mProbee.writeATCmd(String.format(ProbeeZ20S.CMD_SET_ECHO_MODE, "0"), 500);
-                    str = mProbee.writeATCmd(ProbeeZ20S.CMD_RESET, 500);
+                    str = mCommon.getProbee().writeATCmd(String.format(ProbeeZ20S.CMD_SET_ECHO_MODE, "0"), 500);
+                    str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_RESET, 500);
                 }
 
-                mStrLocalAddr = mProbee.writeATCmd(ProbeeZ20S.CMD_GET_NODE_ADDR, 0, 16, 500);
+                mStrLocalAddr = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_GET_NODE_ADDR, 0, 16, 500);
                 
-                str = mProbee.writeATCmd(String.format(ProbeeZ20S.CMD_SET_JOIN_TIME, 10), 500);
-                str = mProbee.writeATCmd(ProbeeZ20S.CMD_SCAN, 5000);
+                str = mCommon.getProbee().writeATCmd(String.format(ProbeeZ20S.CMD_SET_JOIN_TIME, 10), 500);
+                str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_SCAN, 5000);
                 mProbeeCallback.obtainMessage(SCAN_DONE, 0, 0, str).sendToTarget();
             }
         }.start();
@@ -281,22 +225,24 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
             switch (msg.what) {
             case ProbeeZ20S.BT_CON:
                 LogUtil.e("CONNECTED !!!");
-                parent.onClickScan(parent.findViewById(R.id.button_search));
+                parent.onClickScan(parent.findViewById(R.id.buttonSearch));
                 break;
 
-            case ZigBeeNode.CB_READ_DONE:
+            case ZigBeeNode.CB_READ_INFO_DONE:
                 ZigBeeNode info = parent.mNode;
+                parent.mApp.addNode(info, true);
 
                 ((TextView)parent.findViewById(R.id.editNodeAddr)).setText(info.getAddr());
                 ((TextView)parent.findViewById(R.id.editNodeName)).setText(info.getName());
                 ((Spinner)parent.findViewById(R.id.spinnerNodeType)).setSelection(info.getType());
                 for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-                    parent.mSpinnerUsage[i].setSelection(info.getGpioMode(i));
+                    parent.mCommon.getSpinnerUsages()[i].setSelection(info.getGpioMode(i));
+                    parent.mCommon.getEditGpioNames()[i].setText(info.getGpioName(i));
                 }
                 break;
 
             case SCAN_DONE:
-                parent.findViewById(R.id.button_search).setEnabled(true);
+                parent.findViewById(R.id.buttonSearch).setEnabled(true);
                 parent.findViewById(R.id.progressBarSearch).setVisibility(View.INVISIBLE);
                 parent.addDevice((String)msg.obj);
                 break;

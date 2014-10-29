@@ -55,11 +55,12 @@
                android:layout_width="wrap_content"
                android:layout_height="wrap_content" >
                 <Button
-                    android:id="@+id/button_search"
+                    android:id="@+id/buttonSearch"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:onClick="onClickScan"
                     android:background="@drawable/custom_button_lblue"
                     android:text="@string/config_zigbee_scan" />
@@ -69,7 +70,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:onClick="onClickWriteNode"
                     android:background="@drawable/custom_button_lblue"
                     android:text="@string/zigbee_write_node" />

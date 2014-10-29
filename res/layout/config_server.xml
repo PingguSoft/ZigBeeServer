@@ -30,7 +30,10 @@
             android:id="@+id/buttonSelectBTDevice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="5dp"
             android:onClick="onClickBluetooth"
             android:background="@drawable/custom_button_lblue"
             android:text="@string/config_selBT" />
@@ -40,13 +43,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="---"
+            android:text="-------"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:stretchColumns="*" >
 
             <TableRow
@@ -56,7 +59,8 @@
                     android:id="@+id/buttonReadNode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:onClick="onClickReadNode"
                     android:background="@drawable/custom_button_lblue"
                     android:text="@string/zigbee_read_node" />
@@ -65,7 +69,8 @@
                     android:id="@+id/buttonWriteNode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:onClick="onClickWriteNode"
                     android:background="@drawable/custom_button_lblue"
                     android:text="@string/zigbee_write_node" />

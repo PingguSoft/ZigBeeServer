@@ -9,10 +9,15 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Vector;
 
 import android.app.Application;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -22,48 +27,17 @@ import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-public class BTConApp extends Application {
-    private final static String TAG = "BTConApp";
-    
-    private final static String KEY_BATTCELL           = "KEY_BATTCELL";
+public class ZigBeeServerApp extends Application {
     private final static String KEY_BTDEVICE           = "KEY_BTDEVICE";
-    private final static String KEY_RX_RADIO_OPTION    = "KEY_RX_RADIO_OPTION";
-    private final static String KEY_MODE               = "KEY_MODE";
-    private final static String KEY_ZIGBEE_DEVICE      = "KEY_ZIGBEE_DEVICE";
-    private final static String KEY_TRIM_THR           = "KEY_TRIM_THR";
-    private final static String KEY_TRIM_ROLL          = "KEY_TRIM_ROLL";
-    private final static String KEY_TRIM_PITCH         = "KEY_TRIM_PITCH";
-    private final static String KEY_TRIM_YAW           = "KEY_TRIM_YAW";
-    private final static String KEY_SENSOR_SENSITIVITY = "KEY_SENSOR_SENSITIVITY";
     private final static String KEY_INSTALL_TIME       = "KEY_INSTALL_TIME";
     private final static String KEY_INSTALL_VER        = "KEY_INSTALL_VER";
-    private final static String KEY_UBLOX_ID           = "KEY_UBLOX_ID";
-    private final static String KEY_UBLOX_PASSWORD     = "KEY_UBLOX_PASSWORD";
 
-    public final static int     RADIO_DEFAULT_BT = 0;
-    public final static int     RADIO_ZIGBEE     = 1;
-    public final static int     RADIO_BT10       = 2;
-    
-    public final static int     MODE_CONTROLLER        = 0;
-    public final static int     MODE_STATION           = 1;
-    
-    public int      m_nBattCell;
     public String   m_strBTDevice = null;
     public String   m_strBTAddr = null;
-    public int      m_nRXRadioOption = 0;
-    public int      m_nMode = 0;
-    public String   m_strZigBeeDevice = null;
-    public int      m_nTrimThrottle = 0;
-    public int      m_nTrimRoll  = -1;
-    public int      m_nTrimPitch = -1;
-    public int      m_nTrimYaw   = -1;
-    public int      m_nSensitivity   = 0;
     private long    m_lFirstInstallTime;
     private String  m_strVer;
     private SharedPreferences m_spBTCon;
     private Editor  m_editorBTCon;
-    public String	m_strUbloxID;
-    public String	m_strUbloxPassword;
     
     @Override
     public void onCreate() {
@@ -86,21 +60,8 @@ public class BTConApp extends Application {
     }
     
     public void readSettings() {
-        m_nBattCell       = m_spBTCon.getInt(KEY_BATTCELL, 0);
         m_strBTDevice     = m_spBTCon.getString(KEY_BTDEVICE, null);
-        m_nRXRadioOption  = m_spBTCon.getInt(KEY_RX_RADIO_OPTION, 0);
-        m_strZigBeeDevice = m_spBTCon.getString(KEY_ZIGBEE_DEVICE, null);
-        m_nTrimThrottle   = m_spBTCon.getInt(KEY_TRIM_THR, 0);
-        m_nTrimRoll       = m_spBTCon.getInt(KEY_TRIM_ROLL, -1);
-        m_nTrimPitch      = m_spBTCon.getInt(KEY_TRIM_PITCH, -1);
-        m_nTrimYaw        = m_spBTCon.getInt(KEY_TRIM_YAW, -1);
-        m_nSensitivity    = m_spBTCon.getInt(KEY_SENSOR_SENSITIVITY, 5);
-        m_nMode           = m_spBTCon.getInt(KEY_MODE, MODE_CONTROLLER);
-        m_strUbloxID      = m_spBTCon.getString(KEY_UBLOX_ID, null);
-        m_strUbloxPassword= m_spBTCon.getString(KEY_UBLOX_PASSWORD, null);
-
         getInstalledTime();
-        
         m_strVer = m_spBTCon.getString(KEY_INSTALL_VER, null);
     }
     
@@ -166,18 +127,7 @@ public class BTConApp extends Application {
     }
 
     public void saveSettings() {
-        m_editorBTCon.putInt(KEY_BATTCELL, m_nBattCell);
         m_editorBTCon.putString(KEY_BTDEVICE, m_strBTDevice);
-        m_editorBTCon.putInt(KEY_RX_RADIO_OPTION, m_nRXRadioOption);
-        m_editorBTCon.putString(KEY_ZIGBEE_DEVICE, m_strZigBeeDevice);
-        m_editorBTCon.putInt(KEY_TRIM_THR, m_nTrimThrottle);
-        m_editorBTCon.putInt(KEY_TRIM_ROLL, m_nTrimRoll);
-        m_editorBTCon.putInt(KEY_TRIM_PITCH, m_nTrimPitch);
-        m_editorBTCon.putInt(KEY_TRIM_YAW, m_nTrimYaw);
-        m_editorBTCon.putInt(KEY_SENSOR_SENSITIVITY, m_nSensitivity);
-        m_editorBTCon.putInt(KEY_MODE, m_nMode);
-        m_editorBTCon.putString(KEY_UBLOX_ID, m_strUbloxID);
-        m_editorBTCon.putString(KEY_UBLOX_PASSWORD, m_strUbloxPassword);
         m_editorBTCon.commit();
         
         if (m_strBTDevice != null)
@@ -216,10 +166,6 @@ public class BTConApp extends Application {
         return m_strVer;
     }
     
-    public int getMode() {
-        return m_nMode;
-    }
-    
     public void setInstVer(String strVer) {
         m_strVer = strVer;
         m_editorBTCon.putString(KEY_INSTALL_VER, m_strVer);
@@ -251,4 +197,185 @@ public class BTConApp extends Application {
         
         return false;
     }
+    
+    
+    
+    
+    
+    private final static String INFO_FILE = "node_info.dat";
+    private Vector <ZigBeeNode> mNodeList = new Vector <ZigBeeNode>();
+    
+    public int checkData(byte buf[]) {
+        if (buf.length < ZigBeeNode.NODE_SIZE) {
+            LogUtil.e("ABNORMAL DATA SIZE !!");
+            return -1;
+        }
+
+        byte[] bufDst = new byte[16];
+        ByteBuffer byteBuf = ByteBuffer.allocate(ZigBeeNode.NODE_SIZE);
+        
+        byteBuf.order(ByteOrder.LITTLE_ENDIAN);
+        byteBuf.put(buf);
+        byteBuf.rewind();
+        
+        Arrays.fill(bufDst, (byte)0);
+        byteBuf.get(bufDst, 0, 4);                  // signature
+        String strSig = new String(bufDst).trim();
+        if (!strSig.equals(ZigBeeNode.NODE_SIGNATURE)) {
+            LogUtil.e("SIGNATURE MISMATCHED !! : " + strSig);
+            return -1;
+        }
+        
+        byteBuf.get(bufDst, 0, 16);                 // addr
+        String strNodeAddr = new String(bufDst).trim();
+        LogUtil.i("ADDR:" + strNodeAddr);
+        
+        int nNodeType = (int)byteBuf.get();         // type
+        byteBuf.get(bufDst, 0, 16);                 // name
+        String strNodeName = new String(bufDst).trim();
+        LogUtil.i("NAME:" + strNodeName + ", type:" + nNodeType);
+        
+        for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
+            int mode = (int)byteBuf.get();         // gpio mode
+            byteBuf.get(bufDst, 0, 16);            // gpio name
+            String strName = new String(bufDst).trim();
+            LogUtil.i("GPIO" + i + ", MODE:" + mode + ", NAME:" + strName);
+        }
+        
+        return 1;
+    }
+    
+    public void addNode(ZigBeeNode node, boolean preserveGpioName) {
+        ZigBeeNode n;
+        Boolean    boolFound = false;
+        
+        for (int i = 0; i < mNodeList.size(); i++) {
+            n = mNodeList.get(i);
+            if (node.getAddr().equals(n.getAddr())) {
+                
+                if (preserveGpioName) {
+                    for (int j = 0; j < node.getMaxGPIO(); j++) {
+                        node.setGpioName(j, n.getGpioName(j));
+                    }
+                }
+                
+                mNodeList.set(i, node);
+                boolFound = true;
+                LogUtil.i("UPDATED:" + node.getAddr());
+                break;
+            }
+        }
+        
+        if (!boolFound) {
+            mNodeList.add(node);
+            LogUtil.i("ADDED--:" + node.getAddr());
+        }
+    }
+    
+    public ZigBeeNode getNode(String addr) {
+        ZigBeeNode n;
+
+        for (int i = 0; i < mNodeList.size(); i++) {
+            n = mNodeList.get(i);
+            if (addr.equals(n.getAddr())) {
+                return n;
+            }
+        }
+        return null;
+    }
+    
+    public void updateNode(ProbeeZ20S probee) {
+        ZigBeeNode n;
+
+        for (int i = 0; i < mNodeList.size(); i++) {
+            n = mNodeList.get(i);
+            n.setProbeeHandle(probee);
+        }
+    }
+    
+    public void removeNodes() {
+        mNodeList.removeAllElements();
+    }
+    
+    public ZigBeeNode getNode(int pos) {
+        if (mNodeList.size() > pos)
+            return mNodeList.get(pos);
+        else 
+            return null;
+    }
+    
+    public int getNodeCtr() {
+        return mNodeList.size();
+    }
+    
+    
+    public static final String SIGNATURE = "ZBHA";
+    
+    public void load() {
+        FileInputStream inputStream;
+        byte[] buf = null;
+        int nNodeCtr = 0;
+        
+        removeNodes();
+        String strPath = getFilesDir().getPath() + "/" + INFO_FILE;
+        File file = new File(strPath);
+        if (!file.exists()) {
+            return;
+        }
+
+        try {
+            buf = new byte[ZigBeeNode.NODE_SIZE];
+            ByteBuffer bb = ByteBuffer.allocate(4);
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            
+            Arrays.fill(buf,  (byte)0);
+            inputStream = openFileInput(file.getName());
+            
+            inputStream.read(buf, 0, 4);
+            String strSig = new String(buf).trim();
+            if (!strSig.equals(SIGNATURE)) {
+                LogUtil.e("SIGNATURE MISMATCHED !! : " + strSig);
+                inputStream.close();
+                return;
+            }
+            
+            inputStream.read(buf, 0, 4);
+            bb.put(buf, 0, 4);
+            bb.rewind();
+            nNodeCtr = bb.getInt();
+
+            for (int i = 0; i < nNodeCtr; i++) {
+                ZigBeeNode node = new ZigBeeNode();
+                inputStream.read(buf, 0, ZigBeeNode.NODE_SIZE);
+                node.deserialize(buf);
+                addNode(node, false);
+            }
+
+            inputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void save() {
+        FileOutputStream outputStream;
+        
+        ByteBuffer bb = ByteBuffer.allocate(8);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.put(SIGNATURE.getBytes());
+        bb.putInt(mNodeList.size());
+
+        try {
+            outputStream = openFileOutput(INFO_FILE, Context.MODE_PRIVATE);
+            outputStream.write(bb.array());
+            
+            for (int i = 0; i < mNodeList.size(); i++) {
+                byte buf[] = mNodeList.get(i).serialize();
+                outputStream.write(buf, 0, buf.length);
+            }
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }    
 }

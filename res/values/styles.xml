@@ -39,7 +39,7 @@
 </style>
 
    <style name="WindowTitleBackground">     
-        <item name="android:background">@color/titlebackgroundcolor</item>                   
+        <item name="android:background">@color/title_background_color</item>                   
     </style>
     
 </resources>

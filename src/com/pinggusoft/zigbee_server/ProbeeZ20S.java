@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.pinggusoft.zigbee_server.R;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
@@ -24,8 +25,16 @@ public class ProbeeZ20S {
     public static final String CMD_GET_NODE_ADDR    = "at+la?\n";
     public static final String CMD_GET_NODE_NAME    = "at+nn?\n";
     public static final String CMD_SET_NODE_NAME    = "at+nn=%s\n";
-    public static final String CMD_GET_GPIO_MODE    = "at+gpio?\n";
-    public static final String CMD_SET_GPIO_MODE    = "at+gpio=%s\n";
+    public static final String CMD_GET_GPIOS_MODE   = "at+gpio?\n";
+    public static final String CMD_SET_GPIOS_MODE   = "at+gpio=%s\n";
+    public static final String CMD_GET_GPIOS_VALUE  = "at+dio?\n";
+    public static final String CMD_SET_GPIOS_VALUE  = "at+dio=%s\n";
+    public static final String CMD_GET_GPIO_VALUE   = "at+dio%d?\n";
+    public static final String CMD_SET_GPIO_VALUE   = "at+dio%d=%d\n";
+    public static final String CMD_GET_AIS_VALUE    = "at+ai?\n";
+    public static final String CMD_GET_AI_VALUE     = "at+ai%d?\n";
+    
+
     public static final String CMD_REMOTE           = "at+rc=%s,%s";
     public static final String CMD_ESCAPE_DATA      = "+++";
     public static final String CMD_SCAN             = "at+ds\n";
@@ -41,7 +50,7 @@ public class ProbeeZ20S {
     
     private ByteBuffer byteBuf = ByteBuffer.allocate(512);
 
-    private BTConApp        m_App;
+    private Context         mContext;
     private BTSerialPort    m_BTSerial = null;
     private boolean         m_boolConnected = false;
     private String          m_strConDeviceName = null;
@@ -53,14 +62,14 @@ public class ProbeeZ20S {
     private String          m_strAck;
     private BTHandler       mBTHandler = new BTHandler(this);
 
-    ProbeeZ20S(BTConApp app, Handler callback) {
-        m_App       = app;
+    ProbeeZ20S(Context ctx, Handler callback) {
+        mContext    = ctx;
         m_hCallback = callback;
-        m_BTSerial  = new BTSerialPort(m_App, mBTHandler);
+        m_BTSerial  = new BTSerialPort(mContext, mBTHandler);
     }
     
-    ProbeeZ20S(BTConApp app, Handler callback, BTSerialPort btSerial) {
-        m_App       = app;
+    ProbeeZ20S(Context ctx, Handler callback, BTSerialPort btSerial) {
+        mContext    = ctx;
         m_hCallback = callback;
         m_BTSerial  = btSerial;
         m_BTSerial.changeHandler(mBTHandler);
@@ -282,23 +291,23 @@ public class ProbeeZ20S {
                 // save the connected device's name
                 parent.m_strConDeviceName = msg.getData().getString(BTSerialPort.DEVICE_NAME);
                 Toast.makeText(
-                        parent.m_App.getApplicationContext(),
-                        parent.m_App.getString(R.string.connected_to) + "\n" + parent.m_strConDeviceName,
+                        parent.mContext.getApplicationContext(),
+                        parent.mContext.getString(R.string.connected_to) + "\n" + parent.m_strConDeviceName,
                         Toast.LENGTH_SHORT).show();
                 break;
                 
             case BTSerialPort.MESSAGE_TOAST:
                 if (msg.getData().getString(BTSerialPort.TOAST).equals("unable connect")) {
-                    Toast.makeText(parent.m_App.getApplicationContext(),
-                            parent.m_App.getString(R.string.unable_connect) + "\n" + parent.m_App.m_strBTDevice,
+                    Toast.makeText(parent.mContext.getApplicationContext(),
+                            parent.mContext.getString(R.string.unable_connect), // + "\n" + parent.mContext.m_strBTDevice,
                             Toast.LENGTH_SHORT).show();
                 } else if (msg.getData().getString(BTSerialPort.TOAST)
                         .equals("connection lost")) {
-                    Toast.makeText(parent.m_App.getApplicationContext(),
-                            parent.m_App.getString(R.string.connection_lost) + "\n" + parent.m_App.m_strBTDevice,
+                    Toast.makeText(parent.mContext.getApplicationContext(),
+                            parent.mContext.getString(R.string.connection_lost), // + "\n" + parent.mContext.m_strBTDevice,
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(parent.m_App.getApplicationContext(),
+                    Toast.makeText(parent.mContext.getApplicationContext(),
                             msg.getData().getString(BTSerialPort.TOAST), Toast.LENGTH_SHORT)
                             .show();
                 }

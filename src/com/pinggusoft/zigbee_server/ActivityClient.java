@@ -1,6 +1,7 @@
 package com.pinggusoft.zigbee_server;
 
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -9,6 +10,7 @@ import com.pinggusoft.billing.util.IabResult;
 import com.pinggusoft.billing.util.Inventory;
 import com.pinggusoft.billing.util.Purchase;
 import com.pinggusoft.zigbee_server.R;
+import com.pinggusoft.zigbee_server.ActivityDeviceConfig.ProbeeHandler;
 import com.pinggusoft.listitem.EntryAdapter;
 import com.pinggusoft.listitem.EntryItem;
 import com.pinggusoft.listitem.EntrySelItem;
@@ -27,6 +29,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,120 +40,32 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
     
-public class ActivityMain extends Activity {
-    private final static String TAG = "ActivityMain";
-    private static final int RC_REQUEST = 10001;
+public class ActivityClient extends Activity {
+    private static final int    RC_REQUEST = 10001;
     private static final String SKU_PRODUCT = "com.pinggusoft.btcon";
-    
-    private static final int ID_SERVER_SETTING   = 0x00;
-    private static final int ID_DEVICE_SETTING   = 0x01;
 
-    private static final int ID_CLIENT           = 0x04;
-    private static final int ID_PURCHASE         = 0x05;
-    private static final int ID_NOTICE           = 0x06;
-    private static final int ID_QUIT             = 0x07;
+    private ZigBeeServerApp mApp;
+    private boolean         mIsPurchased = true;
+    private IabHelper       mHelper;
     
-    private ZigBeeServerApp  app;
-    private boolean   mIsPurchased = true;
-    private IabHelper mHelper;
-    
-    // Local Bluetooth adapter
-    private BluetoothAdapter mBluetoothAdapter = null;
-    private static boolean mBluetoothEnabled = false;
     private ArrayList<Item> items = new ArrayList<Item>();
-    private ListView mListView = null;
-    private EntryItem mPurchaseItem = null;
+    private ListView        mListView = null;
+    private EntryItem       mPurchaseItem = null;
+    
+    private CommonUtils     mCommon = null;
+    private ProbeeHandler   mProbeeCallback = new ProbeeHandler(this);
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        app =  (ZigBeeServerApp)getApplication();
+        mApp =  (ZigBeeServerApp)getApplication();
         setContentView(R.layout.main_list_view);
-        app.load();
-        
-        
-        mListView = (ListView)findViewById(R.id.listView);
-        
-        items.add(new SectionItem(getString(R.string.main_btcon_config_section)));
-        items.add(new EntryItem(R.drawable.icon_settings, getString(R.string.main_server_config), 
-                getString(R.string.main_server_config_desc), ID_SERVER_SETTING));
-        items.add(new EntryItem(R.drawable.icon_multiwii, getString(R.string.main_device_config), 
-                getString(R.string.main_device_config_desc), ID_DEVICE_SETTING));
-        
-        items.add(new SectionItem(getString(R.string.main_etc_section)));
-        items.add(new EntryItem(R.drawable.icon_multiwii, "CLIENT", 
-                getString(R.string.main_device_config_desc), ID_CLIENT));
-        
-        mPurchaseItem = new EntryItem(R.drawable.icon_purchase, getString(R.string.main_purchase), 
-                getString(R.string.main_purchase_desc), ID_PURCHASE); 
-        items.add(mPurchaseItem);
-        items.add(new EntryItem(R.drawable.icon_notice, getString(R.string.main_notice), 
-                getString(R.string.main_notice_desc), ID_NOTICE));
-        items.add(new EntryItem(R.drawable.icon_quit, getString(R.string.main_quit), 
-                getString(R.string.main_quit_desc), ID_QUIT));
-        
-        EntryAdapter adapter = new EntryAdapter(this, items, R.layout.list_item_entry_main);
-        final Context ctx = this; 
-        
-        mListView.setAdapter(adapter);
-        mListView.setDivider( null ); 
-        mListView.setDividerHeight(0);
-        mListView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> l, View v, int position, long id) {
-                if(items.get(position).getMode() != Item.MODE_SECTION) {
-                    EntryAdapter fia = (EntryAdapter) l.getAdapter();
-                    EntryItem item = (EntryItem)fia.getItem(position);
-                    EntrySelItem it = null;
-                    
-                    if (item.getMode() == Item.MODE_ITEM_SEL) {
-                        it = (EntrySelItem)item;
-                    }
-
-                    switch (item.id) {
-                    case ID_SERVER_SETTING:
-                        onClickServerConfig(null);
-                        break;
-                        
-                    case ID_DEVICE_SETTING:
-                        onClickDeviceConfig(null);
-                        break;
-                        
-                    case ID_PURCHASE:
-                        onClickPurchase(null);
-                        break;
-                        
-                    case ID_NOTICE:
-                        onClickNotice(null);
-                        break;
-                        
-                    case ID_QUIT:
-                        onClickQuit(null);
-                        break;
-                        
-                    case ID_CLIENT:
-                        onClickClient(null);
-                        break;
-                    }
-                }
-            }
-
-        });        
-        
-        // Get local Bluetooth adapter
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        // If the adapter is null, then Bluetooth is not supported
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(this, "Bluetooth is not available",
-                    Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
 
         String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAowry+1jfMdRZlz2gDrc3gkzwKtNyuFdwm+Pk2y+IyE2D67m17I4ZAq0zlhkJSU2NrSA6Su/3GPXVv412zIk3vveMVS4SwqTBhDVfJQek9YRWPVNOMJZBVA5j+C1T5ekdippU1I6fG/q1+NmdInE5xdk4K1bBNlHYZL40eZ6X2ejf7zi9RIthTPqM7c+Nl52GInbPRT0nlFgC9HUGDIMegiLtYiWSdlTFTUz5/Re8/ieM3bH6KXF289ZbsExZTJXvM6Io44D5Pf41XeSiVhGktvs8Chk0YZQ/h5S/4G+WpQ7TlgXhmsPQ91RVR49sUKLk1rh44urQbJ5kpptd2OLwOQIDAQAB";
         LogUtil.e("Creating IAB helper.");
@@ -181,6 +97,85 @@ public class ActivityMain extends Activity {
                 mHelper.queryInventoryAsync(mGotInventoryListener);
             }
         });
+        
+        composeScreen();
+    }
+    
+    private int getResID(int mode) {
+        switch (mode) {
+        case 1:
+            return R.drawable.type_status_64;
+        case 2:
+            return R.drawable.type_light_64;
+        case 3:
+            return R.drawable.type_switch_64;
+        case 4:
+            return R.drawable.type_adc_64;
+        default:
+            return -1;
+        }
+    }
+    
+    public void composeScreen() {
+        mListView = (ListView)findViewById(R.id.listView);
+        
+        mApp.load();
+        
+        for (int i = 0; i < mApp.getNodeCtr(); i++) {
+            ZigBeeNode node = mApp.getNode(i);
+            
+            items.add(new SectionItem(node.getName() + " [" + node.getAddr() + "]"));
+            
+            for (int j = 0; j < node.getMaxGPIO(); j++) {
+                int nResID = getResID(node.getGpioMode(j));
+                if (nResID > 0) {
+                    items.add(new EntryItem(nResID, node.getGpioName(j), 
+                            getString(R.string.main_server_config_desc), (i << 16) | j));
+                }
+            }
+        }
+
+/*        
+        mPurchaseItem = new EntryItem(R.drawable.icon_purchase, getString(R.string.main_purchase), 
+                getString(R.string.main_purchase_desc), ID_PURCHASE);
+        items.add(mPurchaseItem);
+        items.add(new EntryItem(R.drawable.icon_notice, getString(R.string.main_notice), 
+                getString(R.string.main_notice_desc), ID_NOTICE));
+        items.add(new EntryItem(R.drawable.icon_quit, getString(R.string.main_quit), 
+                getString(R.string.main_quit_desc), ID_QUIT));
+*/
+        
+        EntryAdapter adapter = new EntryAdapter(this, items, R.layout.list_item_entry_main);
+        final Context ctx = this;
+        
+        mListView.setAdapter(adapter);
+        mListView.setDivider( null ); 
+        mListView.setDividerHeight(0);
+        mListView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> l, View v, int position, long id) {
+                if(items.get(position).getMode() != Item.MODE_SECTION) {
+                    EntryAdapter fia = (EntryAdapter) l.getAdapter();
+                    EntryItem item = (EntryItem)fia.getItem(position);
+                    EntrySelItem it = null;
+                    
+                    if (item.getMode() == Item.MODE_ITEM_SEL) {
+                        it = (EntrySelItem)item;
+                    }
+
+                    int nNode = item.id >> 16;
+                    int nGpio = (int)(item.id & 0xffff);
+                    ZigBeeNode node = mApp.getNode(nNode); 
+                    LogUtil.d("CLICK : " + node.getName() + ", GPIO:" + nGpio);
+                    node.asyncReadGpio(8);
+                    node.asyncReadAnalog();
+                }
+            }
+        });
+
+        mCommon = new CommonUtils(this, mProbeeCallback);
+        mApp.updateNode(mCommon.getProbee());
+        mCommon.connect();
     }
     
     @Override
@@ -188,17 +183,10 @@ public class ActivityMain extends Activity {
         super.onStart();
         LogUtil.e("onStart");
         
-        if (!mBluetoothAdapter.isEnabled()) {
-            mBluetoothEnabled = false;
-            mBluetoothAdapter.enable();
-        } else {
-            mBluetoothEnabled = true;
-        }
-        
-        String strVer = app.getInstVer();
-        String strPackVer = app.getPackageVer();
+        String strVer = mApp.getInstVer();
+        String strPackVer = mApp.getPackageVer();
         if (strVer == null || !strVer.equals(strPackVer)) {
-            app.setInstVer(strPackVer);
+            mApp.setInstVer(strPackVer);
             onClickNotice(null);
         }
     }
@@ -227,11 +215,6 @@ public class ActivityMain extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        LogUtil.e("onDestroy " + mBluetoothEnabled);
-        if (mBluetoothEnabled == false) {
-            mBluetoothAdapter.disable();
-            LogUtil.e("BT disable !!!!");
-        }
         
         // very important:
         LogUtil.e("Destroying helper.");
@@ -239,21 +222,7 @@ public class ActivityMain extends Activity {
             mHelper.dispose();
             mHelper = null;
         }
-    }
-
-    public void onClickClient(View v) {
-        Intent intent = new Intent(this, ActivityClient.class);
-        startActivity(intent);
-    }
-    
-    public void onClickServerConfig(View v) {
-        Intent intent = new Intent(this, ActivityServerConfig.class);
-        startActivity(intent);
-    }
-    
-    public void onClickDeviceConfig(View v) {
-        Intent intent = new Intent(this, ActivityDeviceConfig.class);
-        startActivity(intent);
+        mCommon.stop();
     }
     
     private Dialog mDialog = null;
@@ -284,21 +253,46 @@ public class ActivityMain extends Activity {
         mDialog.show();
     }
 
-    public void onClickQuit(View v) {
-        finish();
-    }    
-    
-    
-    //
-    // In-App Billing
-    //
 
+    static class ProbeeHandler extends Handler {
+        private WeakReference<ActivityClient> mParent;
+        
+        ProbeeHandler(ActivityClient activity) {
+            mParent = new WeakReference<ActivityClient>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final ActivityClient parent = mParent.get();
+            
+            switch (msg.what) {
+            case ProbeeZ20S.BT_CON:
+                LogUtil.e("CONNECTED !!!");
+                break;
+
+            case ZigBeeNode.CB_READ_INFO_DONE:
+                break;
+                
+            case ZigBeeNode.CB_READ_GPIO_DONE:
+                ZigBeeNode node = (ZigBeeNode)msg.obj;
+                LogUtil.d("GPIO8=" + node.getGpioValue(8));
+                break;
+            }
+        }
+    }
+    
+    
+    /*
+    ***************************************************************************
+    * In-App Billing
+    ***************************************************************************
+    */
     public void onClickPurchase(View v) {
         LogUtil.e("Buy button clicked; launching purchase flow for upgrade.");
 
         /* TODO: for security, generate your payload here for verification. See the comments on
          *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
-         *        an empty string, but on a production app you should carefully generate this. */
+         *        an empty string, but on a production mApp you should carefully generate this. */
         String payload = String.valueOf(System.currentTimeMillis());
 
         mHelper.launchPurchaseFlow(this, SKU_PRODUCT, RC_REQUEST,
@@ -341,7 +335,7 @@ public class ActivityMain extends Activity {
         // Pass on the activity result to the helper for handling
         if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
             // not handled, so handle it ourselves (here's where you'd
-            // perform any handling of activity results not related to in-app
+            // perform any handling of activity results not related to in-mApp
             // billing...
             super.onActivityResult(requestCode, resultCode, data);
         }
@@ -360,7 +354,7 @@ public class ActivityMain extends Activity {
          *
          * WARNING: Locally generating a random string when starting a purchase and
          * verifying it here might seem like a good approach, but this will fail in the
-         * case where the user purchases an item on one device and then uses your app on
+         * case where the user purchases an item on one device and then uses your mApp on
          * a different device, because on the other device you will not have access to the
          * random string you originally generated.
          *
@@ -369,11 +363,11 @@ public class ActivityMain extends Activity {
          * 1. If two different users purchase an item, the payload is different between them,
          *    so that one user's purchase can't be replayed to another user.
          *
-         * 2. The payload must be such that you can verify it even when the app wasn't the
+         * 2. The payload must be such that you can verify it even when the mApp wasn't the
          *    one who initiated the purchase flow (so that items purchased by the user on
          *    one device work on other devices owned by the user).
          *
-         * Using your own server to store and verify developer payloads across app
+         * Using your own server to store and verify developer payloads across mApp
          * installations is recommended.
          */
         LogUtil.e("Payload:" + payload);
@@ -465,31 +459,31 @@ public class ActivityMain extends Activity {
     void updateButtons(boolean boolPurchased) {
         boolean boolEnable = false;
 
-        if(app.isAuthorized()) {
+        if(mApp.isAuthorized()) {
             alert(R.string.main_authorized);
             boolPurchased = true;
         }
 
         if (boolPurchased) {
-            removeItemById(ID_PURCHASE);
+            //removeItemById(ID_PURCHASE);
             mBoolRemoved = true;
         } else if (mBoolRemoved) {
             items.add(8, mPurchaseItem);
             mBoolRemoved = false;
         }
 
-        if (!boolPurchased && app.IsExpired()) {
+        if (!boolPurchased && mApp.IsExpired()) {
             alert(R.string.main_free_timeout);
             boolEnable = false;
         } else {
-            if (app.m_strBTDevice == null || app.m_strBTDevice.length() == 0) {
+            if (mApp.m_strBTDevice == null || mApp.m_strBTDevice.length() == 0) {
                 boolEnable = false;
             } else {
                 boolEnable = true;
             }
         }
         
-        setEnableItemById(ID_DEVICE_SETTING, boolEnable);
+        //setEnableItemById(ID_DEVICE_SETTING, boolEnable);
         if (mListView != null) {
             EntryAdapter adapter = (EntryAdapter)mListView.getAdapter();
             if (adapter != null)

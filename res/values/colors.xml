@@ -7,18 +7,18 @@
     <color name="smalltittleText">#6A6A5A</color>
     <color name="descryption">#d6d099</color>
     <color name="background">#f0e68c</color>
-    <color name="White">#ffffff</color>
-    <color name="Black">#000</color>
-    <color name="Red">#CC0000</color>
-    <color name="Yellow">#ffff00</color>
-    <color name="Green">#99FF00</color>
-    <color name="Buttons">#000</color>
-    <color name="ButtonsTextColor">#fff</color>
-    <color name="ListFocused">#FFD2E8FF</color>
-    <color name="AUX_background">#FF392496</color>
-    <color name="AUX_background_sel">#FFFF4747</color>
     
-    <color name="titlebackgroundcolor">#3232CD</color>
-    <color name="titletextcolor">#FFFF00</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="red">#CC0000</color>
+    <color name="yellow">#ffff00</color>
+    <color name="green">#99FF00</color>
     <color name="dkgray">#444444</color>
+    
+    <color name="buttons">#000000</color>
+    <color name="buttons_text_color">#000fff</color>
+    <color name="focused">#FFD2E8FF</color>
+    <color name="title_background_color">#3232CD</color>
+    <color name="title_text_color">#FFFF00</color>
+
 </resources>

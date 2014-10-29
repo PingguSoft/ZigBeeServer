@@ -1,5 +1,7 @@
 package com.pinggusoft.zigbee_server;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -16,101 +18,43 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import com.pinggusoft.zigbee_server.BTConApp;
+import com.pinggusoft.zigbee_server.ZigBeeServerApp;
 import com.pinggusoft.zigbee_server.R;
 
 public class ActivityServerConfig extends Activity {
-    private BTConApp      mApp;
-    private ProbeeZ20S    mProbee = null;
-    private ProbeeHandler mProbeeCallback = new ProbeeHandler(this);
-    private TextView      mTextBTAddr;
-//    private Spinner       mSpinner[];
-    private Spinner       mSpinnerUsage[];
-    private ZigBeeNode  mNode = null;
+    private ZigBeeServerApp        mApp;
+    private ProbeeHandler   mProbeeCallback = new ProbeeHandler(this);
+    private TextView        mTextBTAddr;
+    private ZigBeeNode      mNode = null;
+    private CommonUtils     mCommon = null;
     
     /*
     ***************************************************************************
     * 
     ***************************************************************************
     */
-    private class SpinnerAdapter extends ArrayAdapter<String>{
-        int    nResImages[] = { R.drawable.type_cross_32,
-                                R.drawable.type_status_32,
-                                R.drawable.type_light_32,
-                                R.drawable.type_switch_32, 
-                                R.drawable.type_adc_32,
-                                R.drawable.type_reserved_32 };
-        String strUsages[] = null;
-        
-        public SpinnerAdapter(Context context, int textViewResourceId, String[] objects) {
-            super(context, textViewResourceId, objects);
-            strUsages = getResources().getStringArray(R.array.zigbee_gpio_usage);
-        }
- 
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            return getCustomView(position, convertView, parent);
-        }
- 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            return getCustomView(position, convertView, parent);
-        }
- 
-        public View getCustomView(int position, View convertView, ViewGroup parent) {
- 
-            LayoutInflater inflater=getLayoutInflater();
-            View row=inflater.inflate(R.layout.config_zigbee_spin_row, parent, false);
-            TextView label=(TextView)row.findViewById(R.id.textMode);
-            label.setText(strUsages[position]);
- 
-            ImageView icon=(ImageView)row.findViewById(R.id.imageMode);
-            icon.setImageResource(nResImages[position]);
- 
-            return row;
-        }
-    };
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.config_server);
       
-        mApp    = (BTConApp)getApplication();
-        mProbee = new ProbeeZ20S(mApp, mProbeeCallback);
+        mApp        = (ZigBeeServerApp)getApplication();
         mTextBTAddr = (TextView) findViewById(R.id.textViewBTAddr);
         
-//        mSpinner = new Spinner[ZigBeeNode.GPIO_CNT];
-        mSpinnerUsage = new Spinner[ZigBeeNode.GPIO_CNT];
-        TableLayout tbl = (TableLayout)findViewById(R.id.container_zigbee_gpio);
-        for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-            TableRow row = (TableRow)LayoutInflater.from(this).inflate(R.layout.config_zigbee_gpio_row, null);
-            TextView tvNo = (TextView)row.findViewById(R.id.text_zigbee_gpio_no);
-            if (tvNo != null)
-                tvNo.setText(String.format("%d", i));
-            
-            TextView tvPIN = (TextView)row.findViewById(R.id.text_zigbee_gpio_pin);
-            if (tvPIN != null)
-                tvPIN.setText(String.format("%d", ZigBeeNode.getPinNo(i)));
-
-//            mSpinner[i] = (Spinner)row.findViewById(R.id.spinnerGpioMode);
-            mSpinnerUsage[i] = (Spinner)row.findViewById(R.id.spinnerGpioUsage);
-            mSpinnerUsage[i].setAdapter(new SpinnerAdapter(this, R.layout.config_zigbee_spin_row, getResources().getStringArray(R.array.zigbee_gpio_usage)));
-            tbl.addView(row);
-        }
-        tbl.requestLayout();
+        mCommon = new CommonUtils(this, mProbeeCallback);
+        mApp.updateNode(mCommon.getProbee());
         
+        mCommon.createGpioTable();
         findViewById(R.id.buttonReadNode).setEnabled(false);
-        if (mApp.m_strBTDevice != null && mApp.m_strBTDevice.length() >= 17) {
-            String strBTMac = mApp.m_strBTDevice.substring(mApp.m_strBTDevice.length() - 17);
-            BluetoothDevice device =  BluetoothAdapter.getDefaultAdapter().getRemoteDevice(strBTMac);
-            mProbee.connect(device);
-        }
+        findViewById(R.id.buttonWriteNode).setEnabled(false);
+        mCommon.connect();
     }
 
     @Override
@@ -122,7 +66,7 @@ public class ActivityServerConfig extends Activity {
     public synchronized void onResume() {
         super.onResume();
         
-        if (BTConApp.isAboveICS()) {
+        if (ZigBeeServerApp.isAboveICS()) {
             ActionBar bar = getActionBar();
             bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#222222")));
             int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
@@ -142,8 +86,8 @@ public class ActivityServerConfig extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mProbee != null)
-            mProbee.stop();
+        mCommon.stop();
+        mApp.save();
     }
 
     // Definition of the one requestCode we use for receiving results.
@@ -178,8 +122,9 @@ public class ActivityServerConfig extends Activity {
     
     public void onClickReadNode(View v) {
         if (mNode == null)
-            mNode = new ZigBeeNode(mProbee);
-        mNode.readInfo();
+            mNode = new ZigBeeNode(mCommon.getProbee());
+        
+        mNode.asyncReadInfo();
     }
     
     public void onClickWriteNode(View v) {
@@ -189,10 +134,16 @@ public class ActivityServerConfig extends Activity {
         mNode.setName(((TextView)findViewById(R.id.editNodeName)).getText().toString());
         mNode.setType(((Spinner)findViewById(R.id.spinnerNodeType)).getSelectedItemPosition());
         for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-            int mode = mSpinnerUsage[i].getSelectedItemPosition();
+            int mode = mCommon.getSpinnerUsages()[i].getSelectedItemPosition();
             mNode.setGpioMode(i, mode);
+            mNode.setGpioName(i, mCommon.getEditGpioNames()[i].getText().toString());
         }
-        mNode.writeInfo();
+        
+        byte[] data = mNode.serialize();
+        mNode.deserialize(data);
+        
+        mApp.addNode(mNode, false);
+        mNode.asyncWriteInfo();
     }
     
     static class ProbeeHandler extends Handler {
@@ -212,16 +163,25 @@ public class ActivityServerConfig extends Activity {
                 parent.onClickReadNode(parent.findViewById(R.id.buttonReadNode));
                 break;
 
-            case ZigBeeNode.CB_READ_DONE:
+            case ZigBeeNode.CB_READ_INFO_DONE:
                 ZigBeeNode info = parent.mNode;
 
+                parent.mApp.addNode(info, true);
+                
                 ((TextView)parent.findViewById(R.id.editNodeAddr)).setText(info.getAddr());
                 ((TextView)parent.findViewById(R.id.editNodeName)).setText(info.getName());
                 ((Spinner)parent.findViewById(R.id.spinnerNodeType)).setSelection(info.getType());
                 for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-                    parent.mSpinnerUsage[i].setSelection(info.getGpioMode(i));
+                    parent.mCommon.getSpinnerUsages()[i].setSelection(info.getGpioMode(i));
+                    parent.mCommon.getEditGpioNames()[i].setText(info.getGpioName(i));
                 }
-                parent.findViewById(R.id.buttonReadNode).setEnabled(true);
+                
+                if (!parent.findViewById(R.id.buttonReadNode).isEnabled())
+                    parent.findViewById(R.id.buttonReadNode).setEnabled(true);
+                
+                if (!parent.findViewById(R.id.buttonWriteNode).isEnabled())
+                    parent.findViewById(R.id.buttonWriteNode).setEnabled(true);
+                
                 break;
             }
         }
