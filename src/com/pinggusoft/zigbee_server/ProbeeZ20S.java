@@ -46,7 +46,9 @@ public class ProbeeZ20S {
     
     
     public static final int IDLE = 0, TAIL_O = 1, TAIL_K = 2, TAIL_CR = 3, TAIL_LF = 4;
-    public static final int BT_CON = 1;
+    public static final int CB_BT_CON = 1;
+    public static final int CB_REPORT = 2;
+    public static final int CB_END    = 3;
     
     private ByteBuffer byteBuf = ByteBuffer.allocate(512);
 
@@ -111,6 +113,7 @@ public class ProbeeZ20S {
                 // time out
                 LogUtil.e(str + " => TIMEOUT !!!");
                 m_nCnt--;
+                strRet = null;
             } else {
                 strRet = m_strAck;
                 str = str.replace("\n", " => ");
@@ -214,8 +217,9 @@ public class ProbeeZ20S {
                     byteBuf.rewind();
                     byteBuf.get(line, 0, len);
                     String v = new String(line);
-//                    LogUtil.e("[TJ] RX:"+ BTSerialPort.byteArrayToHex(line, len));
+                    //LogUtil.e("[TJ] RX:"+ BTSerialPort.byteArrayToHex(line, len));
 
+                    boolean bDone = false;
                     TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter('\n');
                     splitter.setString(v);
                     while (splitter.hasNext()) {
@@ -225,6 +229,7 @@ public class ProbeeZ20S {
                             if (pos >= 0) {
                                 String strResp = v.substring(0, pos);
                                 try {
+                                    bDone = true;
                                     ack(strResp);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -237,6 +242,7 @@ public class ProbeeZ20S {
                             if (pos >= 0) {
                                 //String strResp = v.substring(0, pos);
                                 try {
+                                    bDone = true;
                                     nack();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
@@ -244,6 +250,13 @@ public class ProbeeZ20S {
                                 byteBuf.clear();
                             }
                         }
+                    }
+
+// REPORT:++000195000000735A|100101000*0000001|1826,****,****,****,****,****
+                    if (!bDone && v.startsWith("++")) {
+                        m_hCallback.obtainMessage(CB_REPORT, 0, 0, v).sendToTarget();
+                        LogUtil.d("REPORT:" + v);
+                        byteBuf.clear();
                     }
                 }
                 nState = IDLE;
@@ -274,7 +287,7 @@ public class ProbeeZ20S {
                 case BTSerialPort.STATE_CONNECTED:
                     parent.m_boolConnected = true;
                     if (parent.m_hCallback != null)
-                        parent.m_hCallback.obtainMessage(BT_CON, 0, 0, null).sendToTarget();
+                        parent.m_hCallback.obtainMessage(CB_BT_CON, 0, 0, null).sendToTarget();
                     break;
 
                 case BTSerialPort.STATE_CONNECTING:

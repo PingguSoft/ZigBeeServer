@@ -5,7 +5,7 @@ public class EntryItem implements Item{
 
 	public final String title;
 	public String subtitle;
-	public final int    drawable;
+	public int    drawable;
 	public final int    id;
 	public boolean enabled;
 
@@ -31,6 +31,14 @@ public class EntryItem implements Item{
 	
 	public boolean isEnabled() {
 	    return enabled;
+	}
+	
+	public void setDrawable(int res) {
+	    this.drawable = res;
+	}
+	
+	public void setSubTitle(String text) {
+	    this.subtitle = text;
 	}
 	
 	@Override

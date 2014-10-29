@@ -223,7 +223,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
             final ActivityDeviceConfig parent = mParent.get();
             
             switch (msg.what) {
-            case ProbeeZ20S.BT_CON:
+            case ProbeeZ20S.CB_BT_CON:
                 LogUtil.e("CONNECTED !!!");
                 parent.onClickScan(parent.findViewById(R.id.buttonSearch));
                 break;

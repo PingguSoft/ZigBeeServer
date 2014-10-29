@@ -158,7 +158,7 @@ public class ActivityServerConfig extends Activity {
             final ActivityServerConfig parent = mParent.get();
             
             switch (msg.what) {
-            case ProbeeZ20S.BT_CON:
+            case ProbeeZ20S.CB_BT_CON:
                 LogUtil.e("CONNECTED !!!");
                 parent.onClickReadNode(parent.findViewById(R.id.buttonReadNode));
                 break;
@@ -181,6 +181,10 @@ public class ActivityServerConfig extends Activity {
                 
                 if (!parent.findViewById(R.id.buttonWriteNode).isEnabled())
                     parent.findViewById(R.id.buttonWriteNode).setEnabled(true);
+                
+                break;
+                
+            case ZigBeeNode.CB_REPORT_DONE:
                 
                 break;
             }

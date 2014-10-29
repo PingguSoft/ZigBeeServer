@@ -101,14 +101,14 @@ public class ActivityClient extends Activity {
         composeScreen();
     }
     
-    private int getResID(int mode) {
+    private int getResID(int mode, int val) {
         switch (mode) {
         case 1:
-            return R.drawable.type_status_64;
+            return (val == 1) ? R.drawable.status_on_48 :  R.drawable.status_off_48;
         case 2:
-            return R.drawable.type_light_64;
+            return (val == 1) ? R.drawable.light_on_48 : R.drawable.light_off_48; 
         case 3:
-            return R.drawable.type_switch_64;
+            return (val == 1) ? R.drawable.switch_on_48 : R.drawable.switch_off_48;
         case 4:
             return R.drawable.type_adc_64;
         default:
@@ -127,10 +127,10 @@ public class ActivityClient extends Activity {
             items.add(new SectionItem(node.getName() + " [" + node.getAddr() + "]"));
             
             for (int j = 0; j < node.getMaxGPIO(); j++) {
-                int nResID = getResID(node.getGpioMode(j));
+                int nResID = getResID(node.getGpioMode(j), 0);
                 if (nResID > 0) {
                     items.add(new EntryItem(nResID, node.getGpioName(j), 
-                            getString(R.string.main_server_config_desc), (i << 16) | j));
+                            " ", (i << 16) | j));
                 }
             }
         }
@@ -164,11 +164,19 @@ public class ActivityClient extends Activity {
                     }
 
                     int nNode = item.id >> 16;
-                    int nGpio = (int)(item.id & 0xffff);
+                    int gpio = (int)(item.id & 0xffff);
                     ZigBeeNode node = mApp.getNode(nNode); 
-                    LogUtil.d("CLICK : " + node.getName() + ", GPIO:" + nGpio);
-                    node.asyncReadGpio(8);
-                    node.asyncReadAnalog();
+                    LogUtil.d("CLICK : " + node.getName() + ", GPIO:" + gpio);
+                    
+                    if (node.getGpioMode(gpio) == ZigBeeNode.GPIO_MODE_DIN)
+                        node.asyncReadGpio(item.id, gpio);
+                    else if (node.getGpioMode(gpio) == ZigBeeNode.GPIO_MODE_AIN)
+                        node.asyncReadAnalog(item.id);
+                    else {
+                        int val = node.getGpioValue(gpio) == 0 ? 1 : 0;
+                        node.asyncWriteGpio(item.id, gpio, val);
+                        setResById(item.id, getResID(node.getGpioMode(gpio), val));
+                    }
                 }
             }
         });
@@ -264,18 +272,64 @@ public class ActivityClient extends Activity {
         @Override
         public void handleMessage(Message msg) {
             final ActivityClient parent = mParent.get();
+            ZigBeeNode node;
+            int     val;
+            int     resID;
+            int     gpio;
+            int     nid;
             
             switch (msg.what) {
-            case ProbeeZ20S.BT_CON:
+            case ProbeeZ20S.CB_BT_CON:
                 LogUtil.e("CONNECTED !!!");
+                for (int i = 0; i < parent.mApp.getNodeCtr(); i++) {
+                    node = parent.mApp.getNode(i);
+                    node.asyncReadGpio((i << 16) | (0xffff), -1);
+                    node.asyncReadAnalog((i << 16) | (0xffff));
+                }
                 break;
 
             case ZigBeeNode.CB_READ_INFO_DONE:
                 break;
                 
             case ZigBeeNode.CB_READ_GPIO_DONE:
-                ZigBeeNode node = (ZigBeeNode)msg.obj;
-                LogUtil.d("GPIO8=" + node.getGpioValue(8));
+                node = (ZigBeeNode)msg.obj;
+                gpio = (int)(msg.arg1 & 0xffff);
+                
+                if (gpio < node.getMaxGPIO()) {
+                    val   = node.getGpioValue(gpio);
+                    resID = parent.getResID(node.getGpioMode(gpio), val);
+
+                    LogUtil.d(String.format("GPIO%d=%d", gpio, val));
+                    parent.setResById(msg.arg1, resID);
+                }
+                else {
+                    nid = msg.arg1 >> 16;
+                    LogUtil.d(String.format("NID:%d GPIO=%s", nid, node.getGpioValues()));
+                    
+                    for (int i = 0; i < node.getMaxGPIO(); i++) {
+                        val   = node.getGpioValue(i);
+                        resID = parent.getResID(node.getGpioMode(i), val);
+                        parent.setResById((nid << 16) | i, resID);
+                    }
+                }
+                break;
+                
+            case ZigBeeNode.CB_READ_AI_DONE:
+                node = (ZigBeeNode)msg.obj;
+                nid  = msg.arg1 >> 16;
+                gpio = (int)(msg.arg1 & 0xffff);
+                
+                if (gpio < node.getMaxGPIO()) {
+                    parent.setSubTitleById(msg.arg1, String.format("ADC=%d", node.getGpioAnalog(gpio)));
+                    
+                    LogUtil.d(String.format("NID:%d ADC=%d", nid, node.getGpioAnalog(gpio)));
+                } else {
+                    LogUtil.d(String.format("NID:%d ADCs=%s", nid, node.getGpioAnalogs()));
+                }
+                break;
+                
+            case ZigBeeNode.CB_REPORT_DONE:
+                
                 break;
             }
         }
@@ -401,29 +455,29 @@ public class ActivityClient extends Activity {
         }
     };
     
-    void complain(String strMsg) {
+    private void complain(String strMsg) {
         LogUtil.e(strMsg);
         alert(strMsg);
     }
     
-    void complain(int nResID) {
+    private void complain(int nResID) {
         String strMsg = getResources().getString(nResID);
         
         LogUtil.e(strMsg);
         alert(strMsg);
     }
 
-    void alert(String message) {
+    private void alert(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
     
-    void alert(int nResID) {
+    private void alert(int nResID) {
         String strMsg = getResources().getString(nResID);
         Toast.makeText(this, strMsg, Toast.LENGTH_SHORT).show();
     }
     
     
-    public int findItemPosbyId(int id) {
+    private int findItemPosbyId(int id) {
         int pos = 0;
 
         for (Item i : items) {
@@ -438,16 +492,45 @@ public class ActivityClient extends Activity {
         return -1;
     }
     
-    void setEnableItemById(int id, boolean en) {
+    private void enableItemById(int id, boolean en) {
         int pos = findItemPosbyId(id);
         if (pos > 0) {
             EntryItem ei = (EntryItem)items.get(pos);
+            
             ei.setEnabled(en);
             items.set(pos, ei);
         }
     }
     
-    void removeItemById(int id) {
+    private void setResById(int id, int res) {
+        int pos = findItemPosbyId(id);
+        if (pos > 0) {
+            EntryItem ei = (EntryItem)items.get(pos);
+            ei.setDrawable(res);
+            items.set(pos, ei);
+        }
+        updateUI();
+    }
+    
+    private void setSubTitleById(int id, String text) {
+        int pos = findItemPosbyId(id);
+        if (pos > 0) {
+            EntryItem ei = (EntryItem)items.get(pos);
+            ei.setSubTitle(text);
+            items.set(pos, ei);
+        }
+        updateUI();
+    }
+    
+    private void updateUI() {
+        if (mListView != null) {
+            EntryAdapter adapter = (EntryAdapter)mListView.getAdapter();
+            if (adapter != null)
+                adapter.notifyDataSetChanged();
+        }
+    }
+    
+    private void removeItemById(int id) {
         int pos = findItemPosbyId(id);
         if (pos > 0) {
             items.remove(pos);
@@ -456,7 +539,7 @@ public class ActivityClient extends Activity {
     
     boolean mBoolRemoved = false;
     
-    void updateButtons(boolean boolPurchased) {
+    private void updateButtons(boolean boolPurchased) {
         boolean boolEnable = false;
 
         if(mApp.isAuthorized()) {
