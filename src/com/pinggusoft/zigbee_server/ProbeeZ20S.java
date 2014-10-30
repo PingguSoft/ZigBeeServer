@@ -127,11 +127,16 @@ public class ProbeeZ20S {
     
     public String writeATCmd(String strCmd, int nStart, int nEnd, int timeout) {
         String str = null;
-        try {
-            str = writeATCmd2(strCmd, timeout);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        
+        for (int i = 0; i < 5; i++) {
+            try {
+                str = writeATCmd2(strCmd, timeout);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            if (str != null)
+                break;
         }
         
         if (str != null) {
@@ -149,11 +154,21 @@ public class ProbeeZ20S {
     
     public String writeATCmd(String strCmd, int timeout) {
         String str = null;
-        try {
-            str = writeATCmd2(strCmd, timeout);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        
+        for (int i = 0; i < 5; i++) {
+            try {
+                str = writeATCmd2(strCmd, timeout);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (str != null)
+                break;
+
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         
         if (str != null) {

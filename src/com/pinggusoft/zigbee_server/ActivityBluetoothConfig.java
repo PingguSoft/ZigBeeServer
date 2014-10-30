@@ -84,7 +84,7 @@ public class ActivityBluetoothConfig extends Activity implements OnItemClickList
     @Override
     public synchronized void onResume() {
         super.onResume();
-        if (ZigBeeServerApp.isAboveICS()) {
+        if (ServerApp.isAboveICS()) {
             ActionBar bar = getActionBar();
             bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#222222")));
             int titleId = getResources().getIdentifier("action_bar_title", "id", "android");

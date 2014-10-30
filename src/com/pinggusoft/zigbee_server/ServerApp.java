@@ -27,7 +27,7 @@ import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-public class ZigBeeServerApp extends Application {
+public class ServerApp extends Application {
     private final static String KEY_BTDEVICE           = "KEY_BTDEVICE";
     private final static String KEY_INSTALL_TIME       = "KEY_INSTALL_TIME";
     private final static String KEY_INSTALL_VER        = "KEY_INSTALL_VER";
@@ -47,8 +47,6 @@ public class ZigBeeServerApp extends Application {
         m_spBTCon = PreferenceManager.getDefaultSharedPreferences(this);
         m_editorBTCon = m_spBTCon.edit();
         readSettings();
-        if (m_strBTDevice != null)
-            m_strBTAddr = m_strBTDevice.substring(m_strBTDevice.length() - 17);
     }
     
     private String getTimeString(long lTime) {
@@ -60,7 +58,10 @@ public class ZigBeeServerApp extends Application {
     }
     
     public void readSettings() {
-        m_strBTDevice     = m_spBTCon.getString(KEY_BTDEVICE, null);
+        m_strBTDevice = m_spBTCon.getString(KEY_BTDEVICE, null);
+        if (m_strBTDevice != null)
+            m_strBTAddr = m_strBTDevice.substring(m_strBTDevice.length() - 17);
+        
         getInstalledTime();
         m_strVer = m_spBTCon.getString(KEY_INSTALL_VER, null);
     }
@@ -137,6 +138,17 @@ public class ZigBeeServerApp extends Application {
     @Override
     public void onTerminate() {
         super.onTerminate();
+    }
+    
+    public void setBTDevice(String device) {
+        m_strBTDevice = device;
+
+        if (m_strBTDevice != null)
+            m_strBTAddr = m_strBTDevice.substring(m_strBTDevice.length() - 17);
+    }
+    
+    public String getBTDevice() {
+        return m_strBTDevice;
     }
     
     public String getBTAddr() {
@@ -282,15 +294,6 @@ public class ZigBeeServerApp extends Application {
             }
         }
         return null;
-    }
-    
-    public void updateNode(ProbeeZ20S probee) {
-        ZigBeeNode n;
-
-        for (int i = 0; i < mNodeList.size(); i++) {
-            n = mNodeList.get(i);
-            n.setProbeeHandle(probee);
-        }
     }
     
     public void removeNodes() {

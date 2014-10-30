@@ -1,60 +1,54 @@
 package com.pinggusoft.zigbee_server;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.LayoutInflater;
+import android.os.Messenger;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
-import com.pinggusoft.zigbee_server.ZigBeeServerApp;
+import com.pinggusoft.zigbee_server.ServerApp;
 import com.pinggusoft.zigbee_server.R;
 
 public class ActivityServerConfig extends Activity {
-    private ZigBeeServerApp        mApp;
-    private ProbeeHandler   mProbeeCallback = new ProbeeHandler(this);
-    private TextView        mTextBTAddr;
-    private ZigBeeNode      mNode = null;
-    private CommonUtils     mCommon = null;
+    private ServerApp           mApp;
+    private TextView            mTextBTAddr;
+    private ZigBeeNode          mNode = null;
+    private CommonUtils         mCommon = null;
+    private ServerServiceUtil   mService = null;
     
     /*
     ***************************************************************************
     * 
     ***************************************************************************
     */
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.config_server);
       
-        mApp        = (ZigBeeServerApp)getApplication();
+        mApp        = (ServerApp)getApplication();
         mTextBTAddr = (TextView) findViewById(R.id.textViewBTAddr);
-        
-        mCommon = new CommonUtils(this, mProbeeCallback);
-        mApp.updateNode(mCommon.getProbee());
-        
+        mService = new ServerServiceUtil(getApplicationContext(), new Messenger(new ProbeeHandler(this)));
+
+        mCommon  = new CommonUtils(this);
         mCommon.createGpioTable();
         findViewById(R.id.buttonReadNode).setEnabled(false);
         findViewById(R.id.buttonWriteNode).setEnabled(false);
-        mCommon.connect();
+        
+        new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    onClickReadNode(findViewById(R.id.buttonReadNode));
+                }
+            }, 500);
     }
 
     @Override
@@ -66,7 +60,7 @@ public class ActivityServerConfig extends Activity {
     public synchronized void onResume() {
         super.onResume();
         
-        if (ZigBeeServerApp.isAboveICS()) {
+        if (ServerApp.isAboveICS()) {
             ActionBar bar = getActionBar();
             bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#222222")));
             int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
@@ -74,7 +68,7 @@ public class ActivityServerConfig extends Activity {
             abTitle.setTextColor(Color.WHITE);
         }
         
-        mTextBTAddr.setText(mApp.m_strBTDevice);
+        mTextBTAddr.setText(mApp.getBTDevice());
     }
     
     @Override
@@ -86,7 +80,7 @@ public class ActivityServerConfig extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCommon.stop();
+        mService.unbind();
         mApp.save();
     }
 
@@ -103,7 +97,8 @@ public class ActivityServerConfig extends Activity {
         if (requestCode == GET_BT_ADDR) {
             if (mTextBTAddr != null && info != null) {
                 mTextBTAddr.setText(info);
-                mApp.m_strBTDevice = info;
+                mApp.setBTDevice(info);
+                mService.asyncChangeBTAddr(mApp.getBTAddr());
             }
         }
         LogUtil.e(requestCode + " : " + info);
@@ -122,9 +117,8 @@ public class ActivityServerConfig extends Activity {
     
     public void onClickReadNode(View v) {
         if (mNode == null)
-            mNode = new ZigBeeNode(mCommon.getProbee());
-        
-        mNode.asyncReadInfo();
+            mNode = new ZigBeeNode();
+        mService.asyncReadInfo(0, mNode);
     }
     
     public void onClickWriteNode(View v) {
@@ -143,7 +137,7 @@ public class ActivityServerConfig extends Activity {
         mNode.deserialize(data);
         
         mApp.addNode(mNode, false);
-        mNode.asyncWriteInfo();
+        mService.asyncWriteInfo(0, mNode);
     }
     
     static class ProbeeHandler extends Handler {
@@ -163,7 +157,7 @@ public class ActivityServerConfig extends Activity {
                 parent.onClickReadNode(parent.findViewById(R.id.buttonReadNode));
                 break;
 
-            case ZigBeeNode.CB_READ_INFO_DONE:
+            case ServerService.CMD_READ_INFO:
                 ZigBeeNode info = parent.mNode;
 
                 parent.mApp.addNode(info, true);

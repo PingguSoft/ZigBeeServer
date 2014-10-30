@@ -12,6 +12,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Messenger;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,20 +27,21 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import com.pinggusoft.zigbee_server.ZigBeeServerApp;
+import com.pinggusoft.zigbee_server.ServerApp;
 import com.pinggusoft.zigbee_server.R;
+import com.pinggusoft.zigbee_server.ActivityServerConfig.ProbeeHandler;
 
 
 public class ActivityDeviceConfig extends Activity  implements OnItemClickListener {
     private final static int    SCAN_DONE     = ZigBeeNode.CB_LAST;
   
-    private ZigBeeServerApp  mApp;
+    private ServerApp       mApp;
     private String          mStrLocalAddr = null;
     private String          mStrRemoteAddr = null;
-    private ProbeeHandler   mProbeeCallback = new ProbeeHandler(this);
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
     private ZigBeeNode      mNode = null;
     private CommonUtils     mCommon = null;
+    private ServerServiceUtil   mService = null;
     
     /*
      ***************************************************************************
@@ -52,10 +54,10 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.config_device);
       
-        mApp    = (ZigBeeServerApp)getApplication();
-        mCommon = new CommonUtils(this, mProbeeCallback);
-       
-        mApp.updateNode(mCommon.getProbee());
+        mApp    = (ServerApp)getApplication();
+        
+        mService = new ServerServiceUtil(getApplicationContext(), new Messenger(new ProbeeHandler(this)));
+        mCommon  = new CommonUtils(this);
         
         mCommon.createGpioTable();
         mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.config_bluetooth_device_name);
@@ -65,7 +67,13 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         findViewById(R.id.buttonSearch).setEnabled(false);
         findViewById(R.id.buttonWriteNode).setEnabled(false);
         
-        mCommon.connect();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mService.asyncGetServerAddr(0);
+                onClickScan(findViewById(R.id.buttonSearch));
+            }
+        }, 500);
     }
     
     @Override
@@ -77,7 +85,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
     public synchronized void onResume() {
         super.onResume();
         
-        if (ZigBeeServerApp.isAboveICS()) {
+        if (ServerApp.isAboveICS()) {
             ActionBar bar = getActionBar();
             bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#222222")));
             int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
@@ -95,7 +103,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mCommon.stop();
+        mService.unbind();
         mApp.save();
     }
 
@@ -129,9 +137,9 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
     */
     public void onClickReadNode(View v) {
         if (mNode == null)
-            mNode = new ZigBeeNode(mCommon.getProbee(), mStrRemoteAddr);
+            mNode = new ZigBeeNode(mStrRemoteAddr);
        
-        mNode.asyncReadInfo();
+        mService.asyncReadInfo(0, mNode);
     }
     
     public void onClickWriteNode(View v) {
@@ -146,49 +154,14 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
             mNode.setGpioName(i, mCommon.getEditGpioNames()[i].getText().toString());
         }
         mApp.addNode(mNode, false);
-        mNode.asyncWriteInfo();
+        mService.asyncWriteInfo(0, mNode);
     }
 
     public void onClickScan(final View v) {
-        if (!mCommon.getProbee().isConnected())
-            return;
-
         mNewDevicesArrayAdapter.clear();
         v.setEnabled(false);
         findViewById(R.id.progressBarSearch).setVisibility(View.VISIBLE);
-        
-        new Thread() {
-            @Override
-            public void run() {
-                String str = null;
-                
-                str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_AT, 500);
-                str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_AT, 500);
-                
-                if (str == null) {    /// data mode
-                    for (int i = 0; i < 5; i++) {
-                        str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_ESCAPE_DATA, 1000);
-                        if (str != null)
-                            break;
-                    }
-                }
-
-                str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_GET_ECHO_MODE, 0, 1, 500);
-                LogUtil.e("echo=" + str);
-                if (!str.startsWith("0")) {
-                    str = mCommon.getProbee().writeATCmd(String.format(ProbeeZ20S.CMD_SET_ECHO_MODE, "0"), 500);
-                    str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_RESET, 500);
-                }
-
-                mStrLocalAddr = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_GET_NODE_ADDR, 0, 16, 500);
-                
-                str = mCommon.getProbee().writeATCmd(String.format(ProbeeZ20S.CMD_SET_JOIN_TIME, 10), 500);
-                str = mCommon.getProbee().writeATCmd(ProbeeZ20S.CMD_SCAN, 5000);
-                mProbeeCallback.obtainMessage(SCAN_DONE, 0, 0, str).sendToTarget();
-            }
-        }.start();
-
-        return;
+        mService.asyncScan(0);
     }
     
     private void addDevice(String str) {
@@ -225,10 +198,9 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
             switch (msg.what) {
             case ProbeeZ20S.CB_BT_CON:
                 LogUtil.e("CONNECTED !!!");
-                parent.onClickScan(parent.findViewById(R.id.buttonSearch));
                 break;
 
-            case ZigBeeNode.CB_READ_INFO_DONE:
+            case ServerService.CMD_READ_INFO:
                 ZigBeeNode info = parent.mNode;
                 parent.mApp.addNode(info, true);
 
@@ -241,7 +213,11 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
                 }
                 break;
 
-            case SCAN_DONE:
+            case ServerService.CMD_GET_SERVER_ADDR:
+                parent.mStrLocalAddr = (String)msg.obj;
+                break;
+                
+            case ServerService.CMD_SCAN:
                 parent.findViewById(R.id.buttonSearch).setEnabled(true);
                 parent.findViewById(R.id.progressBarSearch).setVisibility(View.INVISIBLE);
                 parent.addDevice((String)msg.obj);

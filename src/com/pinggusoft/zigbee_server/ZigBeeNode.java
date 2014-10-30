@@ -42,35 +42,22 @@ public class ZigBeeNode {
     private String      mStrGpioValue = null;
     private String      mStrAIValue   = null;
     private String      mStrGpioName[] = new String[GPIO_CNT];
-    private ProbeeZ20S  mProbee = null;
-    private final Lock  mMutex = new ReentrantLock(true);
     private int         mIntAnalog[] = new int[6];
     
-    public ZigBeeNode(ProbeeZ20S probee, String addr, boolean remote, int type, String name, String mode) {
+    public ZigBeeNode(String addr, boolean remote, int type, String name, String mode) {
         mStrNodeAddr = addr;
         mBoolRemote  = remote;
         mIntNodeType = type;
         mStrNodeName = name;
         mStrGpioMode = mode;
-        mProbee      = probee;
     }
     
-    public ZigBeeNode(ProbeeZ20S probee, String addr) {
+    public ZigBeeNode(String addr) {
         mStrNodeAddr = addr;
         mBoolRemote  = true;
         mIntNodeType = 0;
         mStrNodeName = null;
         mStrGpioMode = null;
-        mProbee      = probee;
-    }
-    
-    public ZigBeeNode(ProbeeZ20S probee) {
-        mStrNodeAddr = null;
-        mBoolRemote  = false;
-        mIntNodeType = 0;
-        mStrNodeName = null;
-        mStrGpioMode = null;
-        mProbee      = probee;
     }
     
     public ZigBeeNode() {
@@ -79,11 +66,6 @@ public class ZigBeeNode {
         mIntNodeType = 0;
         mStrNodeName = null;
         mStrGpioMode = null;
-        mProbee      = null;        
-    }
-    
-    public void setProbeeHandle(ProbeeZ20S probee) {
-        mProbee = probee;
     }
 
     public static boolean isNumeric(String str)  
@@ -113,6 +95,13 @@ public class ZigBeeNode {
         return mode;
     }
     
+    public String getGpioMode() {
+        if (mStrGpioMode == null)
+            mStrGpioMode = "00000000000000000";
+        
+        return mStrGpioMode;
+    }
+    
     public void setGpioMode(int gpio, int mode) {
         if (gpio >= GPIO_CNT)
             return;
@@ -123,6 +112,10 @@ public class ZigBeeNode {
         StringBuilder builder = new StringBuilder(mStrGpioMode);
         builder.setCharAt(gpio, (char)('0' + mode));
         mStrGpioMode = builder.toString();
+    }
+    
+    public void setGpioMode(String mode) {
+        mStrGpioMode = mode;
     }
     
     public int getGpioValue(int gpio) {
@@ -138,7 +131,7 @@ public class ZigBeeNode {
         return value;
     }
     
-    public String getGpioValues() {
+    public String getGpioValue() {
         return mStrGpioValue;
     }
     
@@ -154,6 +147,10 @@ public class ZigBeeNode {
         mStrGpioValue = builder.toString();
     }
     
+    public void setGpioValue(String value) {
+        mStrGpioValue = value;
+    }
+    
     public int getGpioAnalog(int gpio) {
         if (9 <= gpio && gpio <= 14) {
             gpio -= 9;
@@ -162,18 +159,20 @@ public class ZigBeeNode {
         return 0;
     }
     
-    public void setGpioAnalog(int gpio, int value) {
-        if (9 <= gpio && gpio <= 14) {
-            gpio -= 9;
-            mIntAnalog[gpio] = value;
-        }
-    }
-    
-    public String getGpioAnalogs() {
+    public String getGpioAnalog() {
         return mStrAIValue;
     }
     
-    public void setGpioAnalogs(String str) {
+    public void setGpioAnalog(int gpio, int value) {
+        if (9 <= gpio && gpio <= 14) {
+            if (getGpioMode(gpio) == GPIO_MODE_AIN) {
+                gpio -= 9;
+                mIntAnalog[gpio] = value;
+            }
+        }
+    }
+    
+    public void setGpioAnalog(String str) {
         mStrAIValue = str;
     }
     
@@ -211,6 +210,10 @@ public class ZigBeeNode {
         return mStrNodeAddr;
     }
     
+    public void setAddr(String addr) {
+        mStrNodeAddr = addr;
+    }
+    
     public int getType() {
         return mIntNodeType;
     }
@@ -226,9 +229,9 @@ public class ZigBeeNode {
     public void setName(String name) {
         mStrNodeName = name;
     }
-    
+
+    /*            
     private void changeATMode() {
-/*        
         String str = null;
         str = mProbee.writeATCmd(ProbeeZ20S.CMD_AT, 500);
         str = mProbee.writeATCmd(ProbeeZ20S.CMD_AT, 500);
@@ -246,190 +249,8 @@ public class ZigBeeNode {
             str = mProbee.writeATCmd(String.format(ProbeeZ20S.CMD_SET_ECHO_MODE, "0"), 500);
             str = mProbee.writeATCmd(ProbeeZ20S.CMD_RESET, 500);
         }
-*/        
     }
-
-    
-    public void asyncReadInfo() {
-        if (!mProbee.isConnected())
-            return;
-        
-        new Thread() {
-            @Override
-            public void run() {
-                String strCmds[] = new String[4];
-
-                mMutex.lock();
-                changeATMode();
-                strCmds[0] = new String(ProbeeZ20S.CMD_GET_NODE_NAME);
-                strCmds[1] = new String(ProbeeZ20S.CMD_GET_NODE_TYPE);
-                strCmds[2] = new String(ProbeeZ20S.CMD_GET_GPIOS_MODE);
-                strCmds[3] = new String(ProbeeZ20S.CMD_GET_NODE_ADDR);
-
-                if (mBoolRemote) {
-                    for (int i = 0; i < strCmds.length; i++) {
-                        strCmds[i] = new String(String.format(ProbeeZ20S.CMD_REMOTE, mStrNodeAddr, strCmds[i])); 
-                    }
-                }
-
-                mStrNodeName = mProbee.writeATCmd(strCmds[0], 500);
-                String str = mProbee.writeATCmd(strCmds[1], 500);
-                if (str != null)
-                    mIntNodeType = Integer.valueOf(str);
-                mStrGpioMode = mProbee.writeATCmd(strCmds[2], 500);
-                if (!mBoolRemote) {
-                    mStrNodeAddr = mProbee.writeATCmd(strCmds[3], 0, 16, 500);
-                }
-                mProbee.getCallBack().obtainMessage(CB_READ_INFO_DONE, 0, 0, ZigBeeNode.this).sendToTarget();
-                mMutex.unlock();
-            }
-        }.start();
-    }
-    
-    public void asyncWriteInfo() {
-        if (!mProbee.isConnected())
-            return;
-
-        new Thread() {
-            @Override
-            public void run() {
-                String strCmds[] = new String[4];
-
-                mMutex.lock();
-                changeATMode();
-                strCmds[0] = new String(String.format(ProbeeZ20S.CMD_SET_NODE_NAME, mStrNodeName));
-                strCmds[1] = new String(String.format(ProbeeZ20S.CMD_SET_NODE_TYPE, mIntNodeType));
-                strCmds[2] = new String(String.format(ProbeeZ20S.CMD_SET_GPIOS_MODE, mStrGpioMode));
-                strCmds[3] = new String(ProbeeZ20S.CMD_RESET);
-
-                String strCmd = null;
-                int    nCtr = mBoolRemote ? strCmds.length : strCmds.length - 1;
-                for (int i = 0; i < nCtr; i++) {
-                    if (mBoolRemote)
-                        strCmd = new String(String.format(ProbeeZ20S.CMD_REMOTE, mStrNodeAddr, strCmds[i]));
-                    else
-                        strCmd = strCmds[i];
-                    
-                    mProbee.writeATCmd(strCmd, 500);
-                }
-                // send join command to local node (coordinator)
-                mProbee.writeATCmd(String.format(ProbeeZ20S.CMD_SET_JOIN_TIME, 10), 500);
-                
-                mProbee.getCallBack().obtainMessage(CB_WRITE_INFO_DONE, 0, 0, ZigBeeNode.this).sendToTarget();
-                mMutex.unlock();
-            }
-        }.start();
-    }
-    
-    public void asyncReadGpio(final int id, final int gpio) {
-        if (!mProbee.isConnected())
-            return;
-
-        new Thread() {
-            @Override
-            public void run() {
-                String strCmd = null;
-                
-                if (gpio < 0)
-                    strCmd = ProbeeZ20S.CMD_GET_GPIOS_VALUE;
-                else
-                    strCmd = String.format(ProbeeZ20S.CMD_GET_GPIO_VALUE, gpio);
-
-                mMutex.lock();
-                changeATMode();
-                if (mBoolRemote)
-                    strCmd = new String(String.format(ProbeeZ20S.CMD_REMOTE, mStrNodeAddr, strCmd));
-                
-                String strRes = null;
-                do {
-                    strRes = mProbee.writeATCmd(strCmd, 500);
-                } while (strRes == null);
-                
-                if (gpio < 0)
-                    mStrGpioValue = strRes;
-                else
-                    setGpioValue(gpio, Integer.valueOf(strRes));
-                mProbee.getCallBack().obtainMessage(CB_READ_GPIO_DONE, id, 0, ZigBeeNode.this).sendToTarget();
-                mMutex.unlock();
-            }
-        }.start();
-    }
-    
-    public void asyncWriteGpio(final int id, final int gpio, final int value) {
-        if (!mProbee.isConnected())
-            return;
-
-        new Thread() {
-            @Override
-            public void run() {
-                String strCmd = null;
-                
-                if (gpio < 0)
-                    strCmd = String.format(ProbeeZ20S.CMD_SET_GPIOS_VALUE, mStrGpioValue);
-                else {
-                    setGpioValue(gpio, value);
-                    strCmd = String.format(ProbeeZ20S.CMD_SET_GPIO_VALUE, gpio, value);
-                }
-
-                mMutex.lock();
-                changeATMode();
-                if (mBoolRemote)
-                    strCmd = new String(String.format(ProbeeZ20S.CMD_REMOTE, mStrNodeAddr, strCmd));
-                
-                String strRes = null;
-                do {
-                    strRes = mProbee.writeATCmd(strCmd, 500);
-                } while (strRes == null);
-                mProbee.getCallBack().obtainMessage(CB_WRITE_GPIO_DONE, id, 0, ZigBeeNode.this).sendToTarget();
-                mMutex.unlock();
-            }
-        }.start();
-    }
-    
-    public void asyncReadAnalog(final int id) {
-        if (!mProbee.isConnected())
-            return;
-        
-        new Thread() {
-            @Override
-            public void run() {
-                String strCmd = ProbeeZ20S.CMD_GET_AIS_VALUE;
-
-                mMutex.lock();
-                changeATMode();
-
-                if (mBoolRemote)
-                    strCmd = new String(String.format(ProbeeZ20S.CMD_REMOTE, mStrNodeAddr, strCmd));
-
-                String strRes = null;
-                do {
-                    strRes = mProbee.writeATCmd(strCmd, 500);
-                } while (strRes == null);
-                mStrAIValue = strRes;
-                
-                TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
-                splitter.setString(mStrAIValue);
-                int i = 0;
-                while (splitter.hasNext()) {
-                    String strHex = splitter.next();
-                    
-                    int val = 0;
-                    try {
-                        val = Integer.parseInt(strHex, 16);
-                    }  catch(NumberFormatException nfe) {
-                        val = 0;
-                    }
-                    mIntAnalog[i] = val;
-                    //LogUtil.d(String.format("Val:%s [%d]", strHex, mIntAnalog[i]));
-                    i++;
-                }
-
-                mProbee.getCallBack().obtainMessage(CB_READ_AI_DONE, id, 0, ZigBeeNode.this).sendToTarget();
-
-                mMutex.unlock();
-            }
-        }.start();
-    }
+*/
 
     private byte[] get16Bytes(String str) {
         byte[] bufDst = new byte[16];

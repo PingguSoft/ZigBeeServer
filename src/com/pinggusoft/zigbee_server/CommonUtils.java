@@ -28,11 +28,10 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 public class CommonUtils {
-    private Spinner         mSpinnerUsages[];
-    private EditText        mEditGpioNames[];
-    private Activity        mActivity;
-    private ProbeeZ20S      mProbee = null;
-    
+    private Spinner             mSpinnerUsages[];
+    private EditText            mEditGpioNames[];
+    private Activity            mActivity;
+        
     /*
      ***************************************************************************
      * 
@@ -79,11 +78,10 @@ public class CommonUtils {
          }
      };
      
-     public CommonUtils(Activity activity, Handler handler) {
+     public CommonUtils(Activity activity) {
          mActivity      = activity;
          mSpinnerUsages = new Spinner[ZigBeeNode.GPIO_CNT];
          mEditGpioNames = new EditText[ZigBeeNode.GPIO_CNT];
-         mProbee        = new ProbeeZ20S(activity.getApplicationContext(), handler);
      }
      
      public Spinner[] getSpinnerUsages() {
@@ -119,23 +117,5 @@ public class CommonUtils {
              tbl.addView(row);
          }
          tbl.requestLayout();
-     }
-     
-     public ProbeeZ20S getProbee() {
-         return mProbee;
-     }
-     
-     public void connect() {
-         ZigBeeServerApp app = (ZigBeeServerApp)mActivity.getApplication();
-         String   strAddr = app.getBTAddr(); 
-         if (strAddr != null) {
-             BluetoothDevice device =  BluetoothAdapter.getDefaultAdapter().getRemoteDevice(strAddr);
-             mProbee.connect(device);
-         }
-     }
-     
-     public void stop() {
-         if (mProbee != null)
-             mProbee.stop();
      }
 }

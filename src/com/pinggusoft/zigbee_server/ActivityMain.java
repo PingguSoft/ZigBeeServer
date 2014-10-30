@@ -22,39 +22,31 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
     
 public class ActivityMain extends Activity {
-    private final static String TAG = "ActivityMain";
     private static final int RC_REQUEST = 10001;
     private static final String SKU_PRODUCT = "com.pinggusoft.btcon";
     
     private static final int ID_SERVER_SETTING   = 0x00;
     private static final int ID_DEVICE_SETTING   = 0x01;
-
+    private static final int ID_TEST             = 0x02;
     private static final int ID_CLIENT           = 0x04;
     private static final int ID_PURCHASE         = 0x05;
     private static final int ID_NOTICE           = 0x06;
     private static final int ID_QUIT             = 0x07;
     
-    private ZigBeeServerApp  app;
+    private ServerApp  app;
     private boolean   mIsPurchased = true;
     private IabHelper mHelper;
     
@@ -64,14 +56,13 @@ public class ActivityMain extends Activity {
     private ArrayList<Item> items = new ArrayList<Item>();
     private ListView mListView = null;
     private EntryItem mPurchaseItem = null;
-    
+   
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        app =  (ZigBeeServerApp)getApplication();
+        app =  (ServerApp)getApplication();
         setContentView(R.layout.main_list_view);
         app.load();
-        
         
         mListView = (ListView)findViewById(R.id.listView);
         
@@ -82,6 +73,8 @@ public class ActivityMain extends Activity {
                 getString(R.string.main_device_config_desc), ID_DEVICE_SETTING));
         
         items.add(new SectionItem(getString(R.string.main_etc_section)));
+//        items.add(new EntryItem(R.drawable.icon_multiwii, "TEST", 
+//                getString(R.string.main_device_config_desc), ID_TEST));
         items.add(new EntryItem(R.drawable.icon_multiwii, "CLIENT", 
                 getString(R.string.main_device_config_desc), ID_CLIENT));
         
@@ -94,7 +87,6 @@ public class ActivityMain extends Activity {
                 getString(R.string.main_quit_desc), ID_QUIT));
         
         EntryAdapter adapter = new EntryAdapter(this, items, R.layout.list_item_entry_main);
-        final Context ctx = this; 
         
         mListView.setAdapter(adapter);
         mListView.setDivider( null ); 
@@ -134,6 +126,9 @@ public class ActivityMain extends Activity {
                         
                     case ID_CLIENT:
                         onClickClient(null);
+                        break;
+                        
+                    case ID_TEST:
                         break;
                     }
                 }
@@ -207,7 +202,7 @@ public class ActivityMain extends Activity {
     public synchronized void onResume() {
         super.onResume();
         LogUtil.e("onResume");
-        if (ZigBeeServerApp.isAboveICS()) {
+        if (ServerApp.isAboveICS()) {
             ActionBar bar = getActionBar();
             bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#222222")));
             int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
@@ -482,7 +477,7 @@ public class ActivityMain extends Activity {
             alert(R.string.main_free_timeout);
             boolEnable = false;
         } else {
-            if (app.m_strBTDevice == null || app.m_strBTDevice.length() == 0) {
+            if (app.getBTDevice() == null || app.getBTDevice().length() == 0) {
                 boolEnable = false;
             } else {
                 boolEnable = true;
