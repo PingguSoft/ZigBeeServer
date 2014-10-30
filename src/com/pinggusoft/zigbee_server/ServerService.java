@@ -25,6 +25,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 public class ServerService extends Service {
+    public static final String ACTION_ENABLE_SERVICE    = "ENABLE_SERVICE"; 
+    public static final String ACTION_DISABLE_SERVICE   = "DISABLE_SERVICE";
+    
     public static final int     RPT_DIO_CHANGED       = ProbeeZ20S.CB_REPORT;
     public static final int     CMD_REGISTER_CLIENT   = ProbeeZ20S.CB_END + 0;
     public static final int     CMD_UNREGISTER_CLIENT = ProbeeZ20S.CB_END + 1;
@@ -41,7 +44,8 @@ public class ServerService extends Service {
     private final Messenger      mMessenger = new Messenger(new IncomingHandler());
     private MessageManager       mMessageManager;
     private ProbeeZ20S           mProbee = null;
-
+    private ServerSoc            mServerSoc;
+    private boolean              mServiceStarted = false;
 
     /*
      ******************************************************************************************************************
@@ -61,6 +65,8 @@ public class ServerService extends Service {
             BluetoothDevice device =  BluetoothAdapter.getDefaultAdapter().getRemoteDevice(strAddr);
             mProbee.connect(device);
         }
+        
+        mServerSoc = new ServerSoc(getApplicationContext());
     }
 
     @Override
@@ -68,6 +74,8 @@ public class ServerService extends Service {
         super.onDestroy();
         if (mProbee != null)
             mProbee.stop();
+        if (mServerSoc != null)
+            mServerSoc.stop();
     }
 
     @Override
@@ -421,6 +429,20 @@ public class ServerService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null) {
+            final String action = intent.getAction();
+            
+            if (ACTION_ENABLE_SERVICE.equals(action) && !mServiceStarted) {
+                mServiceStarted = true;
+                LogUtil.d("SERVICE STARTED!!!");
+            } else if (ACTION_DISABLE_SERVICE.equals(action)){
+                stopForeground(true);
+                stopSelf();
+                mServiceStarted = false;
+                mServerSoc.stop();
+                LogUtil.d("SERVICE STOPPED!!!");
+            }
+        }
         return START_STICKY;
     }
 }

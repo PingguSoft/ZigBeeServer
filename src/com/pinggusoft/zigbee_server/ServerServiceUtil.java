@@ -28,7 +28,7 @@ public class ServerServiceUtil {
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mService = new Messenger(service);
-            LogUtil.e("Attached !!!");
+            LogUtil.i("Attached !!!");
             try {
                 Message msg = Message.obtain(null, ServerService.CMD_REGISTER_CLIENT);
                 msg.replyTo = mMessenger;
@@ -44,14 +44,14 @@ public class ServerServiceUtil {
         public void onServiceDisconnected(ComponentName className) {
             // This is called when the connection with the service has been unexpectedly disconnected - process crashed.
             mService = null;
-            LogUtil.e("Disconnected !!!");
+            LogUtil.i("Disconnected !!!");
         }
     };
     
     private void bind() {
         mCtx.bindService(new Intent(mCtx, ServerService.class), mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
-        LogUtil.e("Binding !!!");
+        LogUtil.i("Binding !!!");
     }
     
     public void unbind() {
@@ -66,7 +66,7 @@ public class ServerServiceUtil {
             }
             mCtx.unbindService(mConnection);
             mIsBound = false;
-            LogUtil.e("Unbinding !!!");
+            LogUtil.i("Unbinding !!!");
         }
     }
     

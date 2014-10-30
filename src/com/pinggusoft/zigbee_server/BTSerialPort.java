@@ -41,7 +41,7 @@ import android.util.Log;
 public class BTSerialPort {
     // Debugging
     private static final String TAG = "BTSerialService";
-    private static final boolean D = true;
+    private static final boolean D = false;
     
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;

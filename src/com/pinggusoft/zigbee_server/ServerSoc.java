@@ -4,17 +4,26 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.ref.WeakReference;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
+
+import com.pinggusoft.zigbee_server.ActivityServerConfig.ProbeeHandler;
+
 public class ServerSoc {
-    public static final int SERVERPORT = 4444;
-    private Thread  mThread = null;
-    private Boolean mBoolRun = Boolean.valueOf(true);
-    
-    
-    private Runnable mServerSoc = new Runnable() {
-        ServerSocket serverSocket = null;
+    public static final int     SERVERPORT = 4444;
+    private Context             mCtx;
+    private ServerThread        mThread;
+   
+    private class ServerThread extends Thread {
+        private ServerSocket        serverSocket = null;
+        private ServerServiceUtil   mService = new ServerServiceUtil(mCtx, new Messenger(new ProbeeHandler(this)));
+        private Boolean             mBoolRun = Boolean.valueOf(true);
         
         @Override
         public void run() {
@@ -24,21 +33,13 @@ public class ServerSoc {
                 
                 while (mBoolRun) {
                     Socket client = serverSocket.accept();
-                    LogUtil.d("S : Receiving...");
                    
                     try {
                         BufferedReader in = new BufferedReader(
                             new InputStreamReader(client.getInputStream()));
-                        String str = in.readLine();
-                        LogUtil.d("S : Receied : '" + str + "'");
                         BufferedWriter out = new BufferedWriter(
                             new OutputStreamWriter(client.getOutputStream()));
-                        out.write("echo1 : " + str + "\n");
-                        out.flush();
-                        out.write("echo2 : " + str + "\n");
-                        out.flush();
-                        out.write("echo3 : " + str + "\n");
-                        out.flush();                   
+
                     } catch (Exception e) {
                         LogUtil.e("S : Error");
                         e.printStackTrace();
@@ -54,14 +55,37 @@ public class ServerSoc {
                 e.printStackTrace();
             }
         }
-    };
+        
+        public void stopThread() {
+            mBoolRun = Boolean.valueOf(false);
+            mService.unbind();
+        }
+        
+        private class ProbeeHandler extends Handler {
+            private WeakReference<ServerThread>    mParent;
+            
+            ProbeeHandler(ServerThread parent) {
+                mParent = new WeakReference<ServerThread>(parent);
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                final ServerThread parent = mParent.get();
+                
+                switch (msg.what) {
+                
+                }
+            }
+        }
+    }
     
-    public ServerSoc() {
-        mThread = new Thread(mServerSoc);
+    public ServerSoc(Context ctx) {
+        mCtx     = ctx;
+        mThread  = new ServerThread();
         mThread.start();
     }
     
     public void stop() {
-        mBoolRun = Boolean.valueOf(false);
+        mThread.stopThread();
     }
 }

@@ -8,54 +8,117 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 
 public class ClientSoc {
-    private Thread  mThread = null;
+    private Thread  mThreadRX = null;
     private Boolean mBoolRun = Boolean.valueOf(true);
+    private Socket  mSocket;
+    private BufferedReader mReader;
+    private BufferedWriter mWriter;
+    private MessageManager mMessageManager;
     
-    private Runnable mClientSoc = new Runnable() {
+    /*
+     ******************************************************************************************************************
+     * RX Thread
+     ******************************************************************************************************************
+     */
+    private Runnable mRunnableRX = new Runnable() {
         @Override
         public void run() {
+            LogUtil.d("C : RunnableRX...");
+
             try {
-                InetAddress serverAddr = InetAddress.getByName("192.168.18.101");
-                
-                LogUtil.d("C : Connecting...");
-                Socket socket = new Socket(serverAddr, 4444);
-               
-                String message = "Hello from Client";
+                InetAddress serverAddr = InetAddress.getByName("127.0.0.1");
+                mSocket = new Socket(serverAddr, 4444);
+
                 try {
-                    LogUtil.d("C : Sending : '" + message + "'");
-                    PrintWriter out = new PrintWriter(new BufferedWriter(
-                        new OutputStreamWriter(socket.getOutputStream())), true);
-                    out.println(message);
-                    LogUtil.d("C : Sent.");
-                    LogUtil.d("C : Done.");
-                   
-                    BufferedReader in = new BufferedReader(
-                        new InputStreamReader(socket.getInputStream()));
-                   
-                    String str = in.readLine();
-                    LogUtil.d(str);
-                    String str1 = in.readLine();
-                    LogUtil.d(str1);
-                    String str2 = in.readLine();
-                    LogUtil.d(str2);
+                    mReader = new BufferedReader(
+                        new InputStreamReader(mSocket.getInputStream()));
+                    
+                    mWriter = new BufferedWriter(
+                        new OutputStreamWriter(mSocket.getOutputStream()));
                 } catch (Exception e) {
                     LogUtil.e("C : Error");
-                } finally {
-                    socket.close();
                 }
             } catch (IOException e) {
                 LogUtil.e("C : Error");
             }
+            
+            while (mBoolRun) {
+                try {
+                    mReader.read();
+                } catch (Exception e) {
+                    LogUtil.e("C : Error");
+                }
+            }
         }
     };
     
-    public ClientSoc() {
-        mThread = new Thread(mClientSoc);
-        mThread.start();
+    /*
+     ******************************************************************************************************************
+     * MessageManager for TX
+     ******************************************************************************************************************
+     */
+    private class MessageManager implements Runnable {
+        private Handler messageHandler;
+        private final BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<Message>();
+
+        @Override
+        public void run() {
+            Looper.prepare();
+            messageHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    LogUtil.w("Please post() your blocking runnables to Mr Manager, " +
+                            "don't use sendMessage()");
+                }
+            };
+            Looper.loop();
+        }
+        
+        private void consumeAsync() {
+            messageHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Message msg;
+                    
+                    do {
+                        msg = messageQueue.poll();
+                        if (msg == null)
+                            break;
+                        
+                        switch(msg.what) {
+
+                        }
+                    } while (msg != null);
+                }
+            });
+        }
+        
+        public boolean offer(final Message msg) {
+            final boolean success = messageQueue.offer(msg);
+            if (success) {
+                consumeAsync();
+            } else {
+                LogUtil.d("Error offerring !!! ");
+            }
+            return success;
+        }
     }
     
+    public ClientSoc() {
+        mThreadRX = new Thread(mRunnableRX);
+        mThreadRX.start();
+
+        mMessageManager = new MessageManager();
+        new Thread(mMessageManager).start();
+    }
+
     public void stop() {
         mBoolRun = Boolean.valueOf(false);
     }

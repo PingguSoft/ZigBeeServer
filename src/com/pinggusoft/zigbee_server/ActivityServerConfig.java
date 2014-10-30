@@ -153,7 +153,7 @@ public class ActivityServerConfig extends Activity {
             
             switch (msg.what) {
             case ProbeeZ20S.CB_BT_CON:
-                LogUtil.e("CONNECTED !!!");
+                LogUtil.d("BT CONNECTED !!!");
                 parent.onClickReadNode(parent.findViewById(R.id.buttonReadNode));
                 break;
 

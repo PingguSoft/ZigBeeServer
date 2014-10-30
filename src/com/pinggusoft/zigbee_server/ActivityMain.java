@@ -14,7 +14,6 @@ import com.pinggusoft.listitem.EntryItem;
 import com.pinggusoft.listitem.EntrySelItem;
 import com.pinggusoft.listitem.Item;
 import com.pinggusoft.listitem.SectionItem;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
@@ -56,6 +55,7 @@ public class ActivityMain extends Activity {
     private ArrayList<Item> items = new ArrayList<Item>();
     private ListView mListView = null;
     private EntryItem mPurchaseItem = null;
+    private boolean   mStart = true;
    
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,6 +63,10 @@ public class ActivityMain extends Activity {
         app =  (ServerApp)getApplication();
         setContentView(R.layout.main_list_view);
         app.load();
+        
+        Intent intent = new Intent(app, ServerService.class);
+        intent.setAction(ServerService.ACTION_ENABLE_SERVICE);
+        startService(intent);
         
         mListView = (ListView)findViewById(R.id.listView);
         
@@ -73,8 +77,8 @@ public class ActivityMain extends Activity {
                 getString(R.string.main_device_config_desc), ID_DEVICE_SETTING));
         
         items.add(new SectionItem(getString(R.string.main_etc_section)));
-//        items.add(new EntryItem(R.drawable.icon_multiwii, "TEST", 
-//                getString(R.string.main_device_config_desc), ID_TEST));
+        items.add(new EntryItem(R.drawable.icon_multiwii, "TEST", 
+                getString(R.string.main_device_config_desc), ID_TEST));
         items.add(new EntryItem(R.drawable.icon_multiwii, "CLIENT", 
                 getString(R.string.main_device_config_desc), ID_CLIENT));
         
@@ -129,6 +133,18 @@ public class ActivityMain extends Activity {
                         break;
                         
                     case ID_TEST:
+//                        mStart = !mStart;
+//                        LogUtil.e("Service :" + mStart);
+//                        if (mStart) {
+//                            Intent intent = new Intent(app, ServerService.class);
+//                            intent.setAction(ServerService.ACTION_ENABLE_SERVICE);
+//                            startService(intent);
+//                        } else {
+//                            Intent intent = new Intent(app, ServerService.class);
+//                            intent.setAction(ServerService.ACTION_DISABLE_SERVICE);
+//                            stopService(intent);
+//                        }
+                        ClientSoc client = new ClientSoc();
                         break;
                     }
                 }
