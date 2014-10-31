@@ -86,51 +86,84 @@ public class LogUtil {
         }
     }
     
-    public static void d(String log) {
+    public static void d(String strFormat, Object ... args) {
         if (BuildConfig.DEBUG) {
+            if ( (strFormat == null) || (strFormat.length() == 0) )
+                return;
+
+            String strMessage = strFormat;
+            if (args.length != 0)
+                strMessage = String.format(strFormat, args);
+            
             int nLine = Thread.currentThread().getStackTrace()[3].getLineNumber();
             String strClass = Thread.currentThread().getStackTrace()[3].getClassName();
             String strMethod = Thread.currentThread().getStackTrace()[3].getMethodName();
             strClass = strClass.substring(strClass.lastIndexOf(".") + 1);
             
-            Log.d(strClass, strMethod + "[" + nLine + "] " + log);
-            write("[D]", strClass, strMethod + "[" + nLine + "] " + log);
+            String str = String.format("[%5d] %-20s %s", nLine, strMethod, strFormat);
+            Log.d(strClass, str);
+            write("[D]", strClass, str);
         }
     }
 
-    public static void i(String log) {
+    public static void i(String strFormat, Object ... args) {
         if (BuildConfig.DEBUG) {
+            if ( (strFormat == null) || (strFormat.length() == 0) )
+                return;
+
+            String strMessage = strFormat;
+            if (args.length != 0)
+                strMessage = String.format(strFormat, args);
+
             int nLine = Thread.currentThread().getStackTrace()[3].getLineNumber();
             String strClass = Thread.currentThread().getStackTrace()[3].getClassName();
             String strMethod = Thread.currentThread().getStackTrace()[3].getMethodName();
             strClass = strClass.substring(strClass.lastIndexOf(".") + 1);
             
-            Log.i(strClass, strMethod + "[" + nLine + "] " + log);
-            write("[I]", strClass, strMethod + "[" + nLine + "] " + log);
+            String str = String.format("[%5d] %-20s %s", nLine, strMethod, strMessage);
+            Log.i(strClass, str);
+            write("[I]", strClass, str);
         }
-    }
-
-    public static void w(String log) {
+    }            
+    
+    public static void w(String strFormat, Object ... args) {
         if (BuildConfig.DEBUG) {
+            if ( (strFormat == null) || (strFormat.length() == 0) )
+                return;
+
+            String strMessage = strFormat;
+            if (args.length != 0)
+                strMessage = String.format(strFormat, args);
+            
             int nLine = Thread.currentThread().getStackTrace()[3].getLineNumber();
             String strClass = Thread.currentThread().getStackTrace()[3].getClassName();
             String strMethod = Thread.currentThread().getStackTrace()[3].getMethodName();
             strClass = strClass.substring(strClass.lastIndexOf(".") + 1);
             
-            Log.w(strClass, strMethod + "[" + nLine + "] " + log);
-            write("[W]", strClass, strMethod + "[" + nLine + "] " + log);
+            String str = String.format("[%5d] %-20s %s", nLine, strMethod, strMessage);
+            Log.w(strClass, str);
+            write("[W]", strClass, str);
         }
-    }
+    }            
+    
+    public static void e(String strFormat, Object ... args) {
+        if ( (strFormat == null) || (strFormat.length() == 0) )
+            return;
 
-    public static void e(String log) {
+        String strMessage = strFormat;
+        if (args.length != 0)
+            strMessage = String.format(strFormat, args);
+        
         int nLine = Thread.currentThread().getStackTrace()[3].getLineNumber();
         String strClass = Thread.currentThread().getStackTrace()[3].getClassName();
         String strMethod = Thread.currentThread().getStackTrace()[3].getMethodName();
         strClass = strClass.substring(strClass.lastIndexOf(".") + 1);
         
-        Log.e(strClass, strMethod + "[" + nLine + "] " + log);
+        String str = String.format("[%5d] %-20s %s", nLine, strMethod, strMessage);
+        Log.e(strClass, str);
+        
         if (BuildConfig.DEBUG) {
-            write("[E]", strClass, strMethod + "[" + nLine + "] " + log);
+            write("[E]", strClass, str);
         }
     }
 

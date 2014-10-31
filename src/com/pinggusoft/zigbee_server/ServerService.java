@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.pinggusoft.httpserver.WebServer;
+
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -28,6 +31,8 @@ public class ServerService extends Service {
     public static final String ACTION_ENABLE_SERVICE    = "ENABLE_SERVICE"; 
     public static final String ACTION_DISABLE_SERVICE   = "DISABLE_SERVICE";
     
+    private static final int    NOTIFICATION_STARTED_ID = 1;
+    
     public static final int     RPT_DIO_CHANGED       = ProbeeZ20S.CB_REPORT;
     public static final int     CMD_REGISTER_CLIENT   = ProbeeZ20S.CB_END + 0;
     public static final int     CMD_UNREGISTER_CLIENT = ProbeeZ20S.CB_END + 1;
@@ -44,8 +49,8 @@ public class ServerService extends Service {
     private final Messenger      mMessenger = new Messenger(new IncomingHandler());
     private MessageManager       mMessageManager;
     private ProbeeZ20S           mProbee = null;
-    private ServerSoc            mServerSoc;
-    private boolean              mServiceStarted = false;
+    private WebServer            mWebServer = null;
+    private NotificationManager  mNotifyManager = null;
 
     /*
      ******************************************************************************************************************
@@ -56,6 +61,9 @@ public class ServerService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        LogUtil.d("SERVICE CREATED !!");
+        
+        mNotifyManager  = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         mMessageManager = new MessageManager();
         new Thread(mMessageManager).start();
 
@@ -65,17 +73,48 @@ public class ServerService extends Service {
             BluetoothDevice device =  BluetoothAdapter.getDefaultAdapter().getRemoteDevice(strAddr);
             mProbee.connect(device);
         }
-        
-        mServerSoc = new ServerSoc(getApplicationContext());
+        mWebServer = new WebServer(this, mNotifyManager);
+        mWebServer.startThread();
     }
 
+    private void showNotification() {
+        final NotificationCompat.Builder builder = new Builder(this);
+        
+        builder.setSmallIcon(R.drawable.icon);
+        builder.setContentTitle(getString(R.string.app_name));
+        builder.setContentText(getString(R.string.main_service_started));
+
+        final Intent notificationIntent = new Intent(this, ActivityMain.class);
+        final PendingIntent pi = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        builder.setContentIntent(pi);
+        final Notification notification = builder.build();
+        
+        mNotifyManager.notify(NOTIFICATION_STARTED_ID, notification);
+        
+        //startForeground(1, notification);
+    }
+    
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        LogUtil.d("SERVICE STARTED !!");
+        showNotification();
+        return START_STICKY;
+    }
+    
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if (mWebServer != null)
+            mWebServer.stopThread();
+        
         if (mProbee != null)
             mProbee.stop();
-        if (mServerSoc != null)
-            mServerSoc.stop();
+        
+        mNotifyManager.cancel(NOTIFICATION_STARTED_ID);
+        mNotifyManager = null;
+        
+        LogUtil.d("SERVICE DESTROYED !!");
     }
 
     @Override
@@ -419,30 +458,5 @@ public class ServerService extends Service {
                 parent.sendMessageToClient(msg);
             }
         }
-    }
-    
-    
-    /*
-     ******************************************************************************************************************
-     * 
-     ******************************************************************************************************************
-     */
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            final String action = intent.getAction();
-            
-            if (ACTION_ENABLE_SERVICE.equals(action) && !mServiceStarted) {
-                mServiceStarted = true;
-                LogUtil.d("SERVICE STARTED!!!");
-            } else if (ACTION_DISABLE_SERVICE.equals(action)){
-                stopForeground(true);
-                stopSelf();
-                mServiceStarted = false;
-                mServerSoc.stop();
-                LogUtil.d("SERVICE STOPPED!!!");
-            }
-        }
-        return START_STICKY;
     }
 }

@@ -37,6 +37,8 @@
     <string name="main_inapp_query_fail">어플리케이션 결제 확인 오류 !</string>
     <string name="main_free_timeout">무료 평가 기간(24시간)이 지났습니다</string>
     <string name="main_authorized">개발자 폰 !!</string>
+    
+    <string name="main_service_started">ZigBee Server가 시작됐습니다"</string>
 
     <!-- BTCon Config -->
     <string name="config_bt_zigbee_combo">Bluetooth ZigBee Combo</string>

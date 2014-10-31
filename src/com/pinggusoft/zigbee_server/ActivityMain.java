@@ -9,6 +9,8 @@ import com.pinggusoft.billing.util.IabResult;
 import com.pinggusoft.billing.util.Inventory;
 import com.pinggusoft.billing.util.Purchase;
 import com.pinggusoft.zigbee_server.R;
+import com.pinggusoft.httpserver.RPCClient;
+import com.pinggusoft.httpserver.RPCServer;
 import com.pinggusoft.listitem.EntryAdapter;
 import com.pinggusoft.listitem.EntryItem;
 import com.pinggusoft.listitem.EntrySelItem;
@@ -64,8 +66,7 @@ public class ActivityMain extends Activity {
         setContentView(R.layout.main_list_view);
         app.load();
         
-        Intent intent = new Intent(app, ServerService.class);
-        intent.setAction(ServerService.ACTION_ENABLE_SERVICE);
+        Intent intent = new Intent(ActivityMain.this, ServerService.class);
         startService(intent);
         
         mListView = (ListView)findViewById(R.id.listView);
@@ -106,7 +107,9 @@ public class ActivityMain extends Activity {
                     if (item.getMode() == Item.MODE_ITEM_SEL) {
                         it = (EntrySelItem)item;
                     }
-
+                    
+                    Intent intent = new Intent(ActivityMain.this, ServerService.class);
+                    
                     switch (item.id) {
                     case ID_SERVER_SETTING:
                         onClickServerConfig(null);
@@ -125,32 +128,32 @@ public class ActivityMain extends Activity {
                         break;
                         
                     case ID_QUIT:
+                        if (mStart)
+                            stopService(intent);
+                        
                         onClickQuit(null);
                         break;
                         
                     case ID_CLIENT:
-                        onClickClient(null);
+                        //onClickClient(null);
+                        RPCClient rpc = new RPCClient();
+                        rpc.startThread();
                         break;
                         
                     case ID_TEST:
-//                        mStart = !mStart;
-//                        LogUtil.e("Service :" + mStart);
-//                        if (mStart) {
-//                            Intent intent = new Intent(app, ServerService.class);
-//                            intent.setAction(ServerService.ACTION_ENABLE_SERVICE);
-//                            startService(intent);
-//                        } else {
-//                            Intent intent = new Intent(app, ServerService.class);
-//                            intent.setAction(ServerService.ACTION_DISABLE_SERVICE);
-//                            stopService(intent);
-//                        }
-                        ClientSoc client = new ClientSoc();
+                        LogUtil.e("Service Running :" + mStart);
+                        if (mStart) {
+                            stopService(intent);
+                        } else {
+                            startService(intent);
+                        }
+                        mStart = !mStart;
                         break;
                     }
                 }
             }
 
-        });        
+        });
         
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
