@@ -33,10 +33,12 @@ public class ActivityServerConfig extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.config_server);
-      
+        
         mApp        = (ServerApp)getApplication();
+        mApp.load();
+        
         mTextBTAddr = (TextView) findViewById(R.id.textViewBTAddr);
-        mService = new ServerServiceUtil(getApplicationContext(), new Messenger(new ProbeeHandler(this)));
+        mService = new ServerServiceUtil(getApplicationContext(), new Messenger(new ServiceHandler(this)));
 
         mCommon  = new CommonUtils(this);
         mCommon.createGpioTable();
@@ -124,12 +126,13 @@ public class ActivityServerConfig extends Activity {
     public void onClickWriteNode(View v) {
         if (mNode == null)
             return;
-        
+
         mNode.setName(((TextView)findViewById(R.id.editNodeName)).getText().toString());
         mNode.setType(((Spinner)findViewById(R.id.spinnerNodeType)).getSelectedItemPosition());
         for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-            int mode = mCommon.getSpinnerUsages()[i].getSelectedItemPosition();
-            mNode.setGpioMode(i, mode);
+            int usage = mCommon.getSpinnerUsages()[i].getSelectedItemPosition();
+            mNode.setGpioUsage(i, usage);
+            mNode.setGpioMode(i, ZigBeeNode.getGpioModeFromUsage(usage));
             mNode.setGpioName(i, mCommon.getEditGpioNames()[i].getText().toString());
         }
         
@@ -140,11 +143,11 @@ public class ActivityServerConfig extends Activity {
         mService.asyncWriteInfo(0, mNode);
     }
     
-    static class ProbeeHandler extends Handler {
+    static class ServiceHandler extends Handler {
         private WeakReference<ActivityServerConfig>    mParent;
         
-        ProbeeHandler(ActivityServerConfig activityOption) {
-            mParent = new WeakReference<ActivityServerConfig>(activityOption);
+        ServiceHandler(ActivityServerConfig parent) {
+            mParent = new WeakReference<ActivityServerConfig>(parent);
         }
 
         @Override
@@ -166,7 +169,7 @@ public class ActivityServerConfig extends Activity {
                 ((TextView)parent.findViewById(R.id.editNodeName)).setText(info.getName());
                 ((Spinner)parent.findViewById(R.id.spinnerNodeType)).setSelection(info.getType());
                 for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-                    parent.mCommon.getSpinnerUsages()[i].setSelection(info.getGpioMode(i));
+                    parent.mCommon.getSpinnerUsages()[i].setSelection(info.getGpioUsage(i));
                     parent.mCommon.getEditGpioNames()[i].setText(info.getGpioName(i));
                 }
                 
@@ -178,9 +181,8 @@ public class ActivityServerConfig extends Activity {
                 
                 break;
                 
-            case ZigBeeNode.CB_REPORT_DONE:
-                
-                break;
+//            case ZigBeeNode.CB_REPORT_DONE:
+//                break;
             }
         }
     }

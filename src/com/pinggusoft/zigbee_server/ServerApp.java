@@ -268,6 +268,7 @@ public class ServerApp extends Application {
                 if (preserveGpioName) {
                     for (int j = 0; j < node.getMaxGPIO(); j++) {
                         node.setGpioName(j, n.getGpioName(j));
+                        node.setGpioUsage(j, n.getGpioUsage(j));
                     }
                 }
                 

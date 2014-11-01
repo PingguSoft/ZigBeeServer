@@ -100,7 +100,7 @@ public class LogUtil {
             String strMethod = Thread.currentThread().getStackTrace()[3].getMethodName();
             strClass = strClass.substring(strClass.lastIndexOf(".") + 1);
             
-            String str = String.format("[%5d] %-20s %s", nLine, strMethod, strFormat);
+            String str = String.format("[%5d] %-20s %s", nLine, strMethod, strMessage);
             Log.d(strClass, str);
             write("[D]", strClass, str);
         }

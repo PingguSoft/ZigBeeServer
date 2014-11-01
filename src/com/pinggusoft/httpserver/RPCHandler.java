@@ -19,8 +19,16 @@ import org.apache.http.util.EntityUtils;
 
 import java.text.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.pinggusoft.zigbee_server.LogUtil;
+import com.pinggusoft.zigbee_server.ServerApp;
+import com.pinggusoft.zigbee_server.ServerService;
+import com.pinggusoft.zigbee_server.ServerServiceUtil;
+import com.pinggusoft.zigbee_server.ZigBeeNode;
 import com.thetransactioncompany.jsonrpc2.*;
 import com.thetransactioncompany.jsonrpc2.server.*;
 
@@ -31,17 +39,22 @@ public class RPCHandler implements HttpRequestHandler {
     private Context context = null;
     private Dispatcher mDispatcher;
     private JSONRPC2Response resp = null;
+    private ServerServiceUtil mService = null;
+    private Lock            mLockACK  = null;
+    private Condition       mLockCond = null;
     
-    public RPCHandler(Context context){
+    public RPCHandler(Context context, ServerServiceUtil service, Lock lock, Condition cond){
         this.context = context;
         
-        // Create a new JSON-RPC 2.0 request dispatcher
-        mDispatcher =  new Dispatcher();
-        
-        
-        // Register the "echo", "getDate" and "getTime" handlers with it
+        mLockACK    = lock;
+        mLockCond   = cond;
+        mService    = service;
+        mDispatcher = new Dispatcher();
         mDispatcher.register(new EchoHandler());
         mDispatcher.register(new DateTimeHandler());
+        mDispatcher.register(new getNode_Handler());
+        mDispatcher.register(new asyncRead_Handler());
+        mDispatcher.register(new asyncWrite_Handler());
     }
 
     @Override
@@ -51,7 +64,7 @@ public class RPCHandler implements HttpRequestHandler {
             HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
             if (entity != null) {
                 String strRequest = EntityUtils.toString(entity, "UTF-8");
-                LogUtil.d("SERVER RECEIVED : " + strRequest);
+//                LogUtil.d("SERVER RECEIVED : " + strRequest);
                 entity.consumeContent();
                 
                 JSONRPC2Request req = null;
@@ -86,74 +99,186 @@ public class RPCHandler implements HttpRequestHandler {
      * 
      ******************************************************************************************************************
      */    
-    // Implements a handler for an "echo" JSON-RPC method
-    public static class EchoHandler implements RequestHandler {
-    
-    
-        // Reports the method names of the handled requests
+
+    public class getNode_Handler implements RequestHandler {
+
         public String[] handledRequests() {
-        
-            return new String[]{"echo"};
+            return new String[]{"getNodeCtr", "getNode"};
         }
         
-        
-        // Processes the requests
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-            
-            if (req.getMethod().equals("echo")) {
-                
-                // Echo first parameter
-                
+            if (req.getMethod().equals("getNodeCtr")) {
+                ServerApp app = (ServerApp)context;
+                int val       = app.getNodeCtr();
+
+                return new JSONRPC2Response(val, req.getID());
+            } else if (req.getMethod().equals("getNode")) {
                 Map<String, Object> params = req.getNamedParams();
-            
-                Object input = params.get("arg1");
-            
-                return new JSONRPC2Response(input, req.getID());
-            }
-            else {
-                // Method name not supported
+                long idx = (long)params.get("idx");
                 
+                ServerApp app = (ServerApp)context;
+                ZigBeeNode node = app.getNode((int)idx);
+                
+                Map<String, Object> param = new HashMap<String,Object>();
+                param.put("node", node.serialize());
+                
+                return new JSONRPC2Response(param, req.getID());
+            } else {
                 return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
             }
         }
     }
     
-    
-    // Implements a handler for "getDate" and "getTime" JSON-RPC methods
-    // that return the current date and time
-    public static class DateTimeHandler implements RequestHandler {
-    
-    
-        // Reports the method names of the handled requests
+    public class asyncRead_Handler implements RequestHandler {
+
         public String[] handledRequests() {
+            return new String[]{"asyncReadGpio", "asyncReadAnalog"};
+        }
         
+        public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
+            long id;
+            int  gpio;
+            int  idx;
+            ZigBeeNode node;
+            
+            if (req.getMethod().equals("asyncReadGpio")) {
+                Map<String, Object> params = req.getNamedParams();
+                
+                id   = (long)params.get("id");
+                gpio = (int)id & 0xffff;
+                idx  = (int)id >> 16;
+                node = ((ServerApp)context).getNode((int)idx);
+                mService.asyncReadGpio((int)id, node);
+                
+                mLockACK.lock();
+                boolean boolRet = false;
+                try {
+                    boolRet = mLockCond.await(300, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mLockACK.unlock();
+                
+                if (boolRet) {
+                    int  val  = node.getGpioValue(gpio);
+                    return new JSONRPC2Response(val, req.getID());
+                }
+                return new JSONRPC2Response(JSONRPC2Error.INTERNAL_ERROR, req.getID());
+            } else if (req.getMethod().equals("asyncReadAnalog")) {
+                Map<String, Object> params = req.getNamedParams();
+                
+                id   = (long)params.get("id");
+                gpio = (int)id & 0xffff;
+                idx  = (int)id >> 16;
+                node = ((ServerApp)context).getNode((int)idx);
+                mService.asyncReadAnalog((int)id, node);
+                
+                mLockACK.lock();
+                boolean boolRet = false;
+                try {
+                    boolRet = mLockCond.await(300, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mLockACK.unlock();
+                
+                if (boolRet) {
+                    int  val  = node.getGpioAnalog(gpio);
+                    return new JSONRPC2Response(val, req.getID());
+                }
+                return new JSONRPC2Response(JSONRPC2Error.INTERNAL_ERROR, req.getID());
+            } else {
+                return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
+            }
+        }
+    }
+    
+    public class asyncWrite_Handler implements RequestHandler {
+
+        public String[] handledRequests() {
+            return new String[]{"asyncWriteGpio"};
+        }
+        
+        public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
+            long id;
+            long value;
+            int  gpio;
+            int  idx;
+            ZigBeeNode node;
+            
+            if (req.getMethod().equals("asyncWriteGpio")) {
+                Map<String, Object> params = req.getNamedParams();
+
+                id    = (long)params.get("id");
+                value = (long)params.get("value");
+                gpio  = (int)id & 0xffff;
+                idx   = (int)id >> 16;
+                node  = ((ServerApp)context).getNode((int)idx);
+                mService.asyncWriteGpio((int)id, (int)value, node);
+                
+                mLockACK.lock();
+                boolean boolRet = false;
+                try {
+                    boolRet = mLockCond.await(300, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mLockACK.unlock();
+                
+                if (boolRet) {
+                    return new JSONRPC2Response(value, req.getID());
+                }
+                return new JSONRPC2Response(JSONRPC2Error.INTERNAL_ERROR, req.getID());
+            } 
+            else {
+                return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
+            }
+        }
+    } 
+    
+    
+    
+    
+    
+    
+    
+    
+    public class EchoHandler implements RequestHandler {
+
+        public String[] handledRequests() {
+            return new String[]{"echo"};
+        }
+        
+        public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
+            if (req.getMethod().equals("echo")) {
+                Map<String, Object> params = req.getNamedParams();
+                Object input = params.get("arg1");
+                return new JSONRPC2Response(input, req.getID());
+            }
+            else {
+                return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
+            }
+        }
+    }
+    
+    public class DateTimeHandler implements RequestHandler {
+
+        public String[] handledRequests() {
             return new String[]{"getDate", "getTime"};
         }
         
-        
-        // Processes the requests
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-        
             if (req.getMethod().equals("getDate")) {
-            
                 DateFormat df = DateFormat.getDateInstance();
-                
                 String date = df.format(new Date());
-                
                 return new JSONRPC2Response(date, req.getID());
             }
             else if (req.getMethod().equals("getTime")) {
-            
                 DateFormat df = DateFormat.getTimeInstance();
-                
                 String time = df.format(new Date());
-                
                 return new JSONRPC2Response(time, req.getID());
             }
             else {
-            
-                // Method name not supported
-                
                 return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
             }
         }

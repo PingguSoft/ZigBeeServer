@@ -96,7 +96,10 @@ public class RPCServer {
         Map<String, Object> echoParam = new HashMap<String,Object>();
         
         echoParam.put("arg1", "Hello world!");
-        
+        byte b[] = new byte[20];
+        for (int i = 0; i < b.length; i++)
+            b[i] = (byte)i;
+        echoParam.put("arg2", b);
         JSONRPC2Request req = new JSONRPC2Request("echo", echoParam, "req-id-01");
         LogUtil.d("Request: " + req);
         
@@ -118,5 +121,6 @@ public class RPCServer {
         
         resp = dispatcher.process(req, null);
         LogUtil.d("Response: " + resp);
+
     }
 }

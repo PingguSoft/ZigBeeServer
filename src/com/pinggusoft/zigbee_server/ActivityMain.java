@@ -9,7 +9,6 @@ import com.pinggusoft.billing.util.IabResult;
 import com.pinggusoft.billing.util.Inventory;
 import com.pinggusoft.billing.util.Purchase;
 import com.pinggusoft.zigbee_server.R;
-import com.pinggusoft.httpserver.RPCClient;
 import com.pinggusoft.httpserver.RPCServer;
 import com.pinggusoft.listitem.EntryAdapter;
 import com.pinggusoft.listitem.EntryItem;
@@ -64,8 +63,8 @@ public class ActivityMain extends Activity {
         super.onCreate(savedInstanceState);
         app =  (ServerApp)getApplication();
         setContentView(R.layout.main_list_view);
+
         app.load();
-        
         Intent intent = new Intent(ActivityMain.this, ServerService.class);
         startService(intent);
         
@@ -80,8 +79,8 @@ public class ActivityMain extends Activity {
         items.add(new SectionItem(getString(R.string.main_etc_section)));
         items.add(new EntryItem(R.drawable.icon_multiwii, "TEST", 
                 getString(R.string.main_device_config_desc), ID_TEST));
-        items.add(new EntryItem(R.drawable.icon_multiwii, "CLIENT", 
-                getString(R.string.main_device_config_desc), ID_CLIENT));
+//        items.add(new EntryItem(R.drawable.icon_multiwii, "CLIENT", 
+//                getString(R.string.main_device_config_desc), ID_CLIENT));
         
         mPurchaseItem = new EntryItem(R.drawable.icon_purchase, getString(R.string.main_purchase), 
                 getString(R.string.main_purchase_desc), ID_PURCHASE); 
@@ -134,11 +133,6 @@ public class ActivityMain extends Activity {
                         onClickQuit(null);
                         break;
                         
-                    case ID_CLIENT:
-                        //onClickClient(null);
-                        RPCClient rpc = new RPCClient();
-                        rpc.startThread();
-                        break;
                         
                     case ID_TEST:
                         LogUtil.e("Service Running :" + mStart);
@@ -253,11 +247,6 @@ public class ActivityMain extends Activity {
             mHelper.dispose();
             mHelper = null;
         }
-    }
-
-    public void onClickClient(View v) {
-        Intent intent = new Intent(this, ActivityClient.class);
-        startActivity(intent);
     }
     
     public void onClickServerConfig(View v) {

@@ -73,7 +73,7 @@ public class ServerService extends Service {
             BluetoothDevice device =  BluetoothAdapter.getDefaultAdapter().getRemoteDevice(strAddr);
             mProbee.connect(device);
         }
-        mWebServer = new WebServer(this, mNotifyManager);
+        mWebServer = new WebServer(getApplicationContext(), mNotifyManager);
         mWebServer.startThread();
     }
 
@@ -372,7 +372,7 @@ public class ServerService extends Service {
         sendMessageToClient(CMD_READ_GPIO, id, 0, node);
     }
     
-    public void asyncWriteGpio(int id, int value, ZigBeeNode node) {
+    private void asyncWriteGpio(int id, int value, ZigBeeNode node) {
         if (!mProbee.isConnected())
             return;
 
@@ -452,6 +452,19 @@ public class ServerService extends Service {
         public void handleMessage(Message msg) {
             final ServerService parent = mParent.get();
             if (msg.what == RPT_DIO_CHANGED) {
+                String strMsg  = (String)msg.obj;
+                
+                int nPos = strMsg.indexOf("|");
+                String strAddr = strMsg.substring(2, nPos);
+                String strDIO  = strMsg.substring(nPos + 1, nPos + 1 + ZigBeeNode.GPIO_CNT);
+                nPos = strMsg.lastIndexOf("|");
+                String strAnalog = strMsg.substring(nPos + 1);
+                
+                LogUtil.d("ADDR:%s, DIO:%s, ANALOG:%s", strAddr, strDIO, strAnalog);
+                ServerApp app = (ServerApp)parent.getApplicationContext();
+                ZigBeeNode node = app.getNode(strAddr);
+                node.setGpioValue(strDIO);
+                node.setGpioAnalog(strAnalog);
              // ++000195000000735A|100101000*0000001|1826,****,****,****,****,****
              //
             } else {

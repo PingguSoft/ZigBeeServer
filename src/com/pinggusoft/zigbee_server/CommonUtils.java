@@ -39,10 +39,10 @@ public class CommonUtils {
      */
      public class SpinnerAdapter extends ArrayAdapter<String>{
          int        mIntResImages[] = { R.drawable.type_cross_32,
-                                        R.drawable.type_status_32,
-                                        R.drawable.type_light_32,
-                                        R.drawable.type_switch_32, 
+                                        R.drawable.type_touch_32,
+                                        R.drawable.type_switch_32,
                                         R.drawable.type_adc_32,
+                                        R.drawable.type_light_32,
                                         R.drawable.type_reserved_32 };
          String     mStrUsages[] = null;
          int        mIntResId;

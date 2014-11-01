@@ -15,42 +15,42 @@ import android.text.TextUtils;
 import android.util.Log;
 
 public class ZigBeeNode {
+    public  final static int TYPE_NONE         = 0;
+    public  final static int TYPE_INPUT_TOUCH  = 1;
+    public  final static int TYPE_INPUT_SWITCH = 2;
+    public  final static int TYPE_INPUT_ANALOG = 3;
+    public  final static int TYPE_OUTPUT_LIGHT = 4;
+    public  final static int TYPE_RESERVED     = 5;
+    
     public  final static int GPIO_CNT  = 17;
-    
-    public  final static int CB_REPORT_DONE     = ProbeeZ20S.CB_REPORT;
-    public  final static int CB_READ_INFO_DONE  = ProbeeZ20S.CB_END + 0;
-    public  final static int CB_WRITE_INFO_DONE = ProbeeZ20S.CB_END + 1;
-    public  final static int CB_READ_GPIO_DONE  = ProbeeZ20S.CB_END + 2;
-    public  final static int CB_WRITE_GPIO_DONE = ProbeeZ20S.CB_END + 3;
-    public  final static int CB_READ_AI_DONE    = ProbeeZ20S.CB_END + 4;
-    public  final static int CB_LAST            = ProbeeZ20S.CB_END + 5;
-    
     public  final static int GPIO_MODE_DISABLED = 0;
     public  final static int GPIO_MODE_DIN      = 1;
     public  final static int GPIO_MODE_DOUT_LO  = 2;
     public  final static int GPIO_MODE_DOUT_HI  = 3;
     public  final static int GPIO_MODE_AIN      = 4;
+    public  final static int GPIO_MODE_RESERVED = 5;
     
-    private final static int    GPIO_PINS[]         = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 32, 31, 30, 29, 28, 27, 24, 23 };
-    private final static String GPIO_MODE_LABEL[]   = { "0 - disabled", "1 - DIN", "2 - DOUT (low)", "3 - DOUT (high)", "4 - Analog In", "5 - Reserved" };
+    private final static int    GPIO_PINS[]       = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 32, 31, 30, 29, 28, 27, 24, 23 };
+    private final static String GPIO_MODE_LABEL[] = { "0 - disabled", "1 - DIN", "2 - DOUT (low)", "3 - DOUT (high)", "4 - Analog In", "5 - Reserved" };
     
-    private boolean     mBoolRemote  = false;
-    private int         mIntNodeType = 0;
-    private String      mStrNodeAddr = null;
-    private String      mStrNodeName = null;
-    private String      mStrGpioMode = null;
-    private String      mStrGpioValue = null;
-    private String      mStrAIValue   = null;
+    private boolean     mBoolRemote    = false;
+    private int         mIntNodeType   = 0;
+    private String      mStrNodeAddr   = null;
+    private String      mStrNodeName   = null;
+    private String      mStrGpioMode   = null;
+    private String      mStrGpioUsage  = null;
+    private String      mStrAIValue    = null;
     private String      mStrGpioName[] = new String[GPIO_CNT];
-    private int         mIntAnalog[] = new int[6];
-    
-    public ZigBeeNode(String addr, boolean remote, int type, String name, String mode) {
-        mStrNodeAddr = addr;
-        mBoolRemote  = remote;
-        mIntNodeType = type;
-        mStrNodeName = name;
-        mStrGpioMode = mode;
-    }
+    private int         mIntAnalog[]   = new int[6];
+    private int         mIntGpioValue  = 0;
+
+//    public ZigBeeNode(String addr, boolean remote, int type, String name, String mode) {
+//        mStrNodeAddr = addr;
+//        mBoolRemote  = remote;
+//        mIntNodeType = type;
+//        mStrNodeName = name;
+//        mStrGpioMode = mode;
+//    }
     
     public ZigBeeNode(String addr) {
         mStrNodeAddr = addr;
@@ -59,7 +59,7 @@ public class ZigBeeNode {
         mStrNodeName = null;
         mStrGpioMode = null;
     }
-    
+
     public ZigBeeNode() {
         mStrNodeAddr = null;
         mBoolRemote  = false;
@@ -82,6 +82,73 @@ public class ZigBeeNode {
         return mBoolRemote;
     }
     
+    public static int getGpioModeFromUsage(int mode) {
+        switch(mode) {
+        case ZigBeeNode.TYPE_INPUT_TOUCH:
+        case ZigBeeNode.TYPE_INPUT_SWITCH:
+            mode = ZigBeeNode.GPIO_MODE_DIN;
+            break;
+            
+        case ZigBeeNode.TYPE_INPUT_ANALOG:
+            mode = ZigBeeNode.GPIO_MODE_AIN;
+            break;
+            
+        case ZigBeeNode.TYPE_OUTPUT_LIGHT:
+            mode = ZigBeeNode.GPIO_MODE_DOUT_LO;
+            break;
+
+        case ZigBeeNode.TYPE_RESERVED:
+            mode = ZigBeeNode.GPIO_MODE_RESERVED;
+            break;
+            
+        default:
+            mode = ZigBeeNode.GPIO_MODE_DISABLED;
+            break;
+        }
+        return mode;
+    }
+    
+    // GPIO USAGE
+    public int getGpioUsage(int gpio) {
+        int mode = 0;
+        
+        if (gpio >= GPIO_CNT)
+            return 0;
+        
+        if (mStrGpioUsage == null)
+            mStrGpioUsage = "00000000000000000";
+        
+        String strVal = mStrGpioUsage.substring(gpio, gpio + 1);
+        if (isNumeric(strVal))
+            mode = Integer.valueOf(strVal);
+        
+        return mode;
+    }
+    
+    public String getGpioUsage() {
+        if (mStrGpioUsage == null)
+            mStrGpioUsage = "00000000000000000";
+        
+        return mStrGpioUsage;
+    }
+    
+    public void setGpioUsage(int gpio, int mode) {
+        if (gpio >= GPIO_CNT)
+            return;
+
+        if (mStrGpioUsage == null)
+            mStrGpioUsage = "00000000000000000";
+        
+        StringBuilder builder = new StringBuilder(mStrGpioUsage);
+        builder.setCharAt(gpio, (char)('0' + mode));
+        mStrGpioUsage = builder.toString();
+    }
+    
+    public void setGpioUsage(String mode) {
+        mStrGpioUsage = mode;
+    }
+    
+    // GPIO Mode
     public int getGpioMode(int gpio) {
         int mode = 0;
         
@@ -117,40 +184,58 @@ public class ZigBeeNode {
     public void setGpioMode(String mode) {
         mStrGpioMode = mode;
     }
-    
-    public int getGpioValue(int gpio) {
-        int value = 0;
 
-        if (gpio >= GPIO_CNT || mStrGpioValue == null || mStrGpioValue.length() < GPIO_CNT)
-            return 0;
-
-        String strVal = mStrGpioValue.substring(gpio, gpio + 1);
-        if (isNumeric(strVal))
-            value = Integer.valueOf(strVal);
-
-        return value;
+    // GPIO Value
+    public void setGpioValue(String value) {
+        for (int i = GPIO_CNT - 1; i >= 0; i--) {
+            String val  = String.valueOf(value.charAt(i));
+            int    mask = (1 << i);
+            mIntGpioValue &= (~mask);
+            if (isNumeric(val) && Integer.valueOf(val) == 1)
+                mIntGpioValue |= mask;
+        }
     }
     
-    public String getGpioValue() {
-        return mStrGpioValue;
+    public void setGpioValue(int value) {
+        mIntGpioValue = value;
     }
-    
+
     public void setGpioValue(int gpio, int value) {
         if (gpio >= GPIO_CNT)
             return;
 
-        if (mStrGpioValue == null)
-            mStrGpioValue = "00000000000000000";
+        int mask = (1 << gpio);
+        if (value == 0)
+            mIntGpioValue &= (~mask);
+        else
+            mIntGpioValue |= mask;
+    }
+
+    public int getGpioValue(int gpio) {
+        if (gpio >= GPIO_CNT) {
+            return mIntGpioValue;
+        }
         
-        StringBuilder builder = new StringBuilder(mStrGpioMode);
-        builder.setCharAt(gpio, (char)('0' + value));
-        mStrGpioValue = builder.toString();
+        int value = (mIntGpioValue & (1 << gpio));
+        if (value > 0)
+            return 1;
+
+        return 0;
     }
     
-    public void setGpioValue(String value) {
-        mStrGpioValue = value;
+    public String getGpioValue() {
+        String val = "";
+        for (int i = 0; i < GPIO_CNT; i++) {
+            int  mask = (1 << i);
+            if ((mIntGpioValue & mask) == mask)
+                val += "1";
+            else
+                val += "0";
+        }
+        return val;
     }
-    
+   
+    // GPIO Analog
     public int getGpioAnalog(int gpio) {
         if (9 <= gpio && gpio <= 14) {
             gpio -= 9;
@@ -176,6 +261,8 @@ public class ZigBeeNode {
         mStrAIValue = str;
     }
     
+    
+    // ETCS
     public int getMaxGPIO() {
         return GPIO_CNT;
     }
@@ -230,28 +317,6 @@ public class ZigBeeNode {
         mStrNodeName = name;
     }
 
-    /*            
-    private void changeATMode() {
-        String str = null;
-        str = mProbee.writeATCmd(ProbeeZ20S.CMD_AT, 500);
-        str = mProbee.writeATCmd(ProbeeZ20S.CMD_AT, 500);
-        
-        if (str == null) {    /// data mode
-            for (int i = 0; i < 5; i++) {
-                str = mProbee.writeATCmd(ProbeeZ20S.CMD_ESCAPE_DATA, 1000);
-                if (str != null && str.contains(ProbeeZ20S.RESP_OK))
-                    break;
-            }
-        }
-
-        str = mProbee.writeATCmd(ProbeeZ20S.CMD_GET_ECHO_MODE, 0, 1, 500);
-        if (str != null && !str.startsWith("0")) {
-            str = mProbee.writeATCmd(String.format(ProbeeZ20S.CMD_SET_ECHO_MODE, "0"), 500);
-            str = mProbee.writeATCmd(ProbeeZ20S.CMD_RESET, 500);
-        }
-    }
-*/
-
     private byte[] get16Bytes(String str) {
         byte[] bufDst = new byte[16];
         Arrays.fill(bufDst, (byte)0);
@@ -265,7 +330,7 @@ public class ZigBeeNode {
     }
     
     public final static String  NODE_SIGNATURE = "NODE";
-    public final static int     NODE_SIZE      = 4 + 16 + 1 + 16 + 17 * (1 + 16);
+    public final static int     NODE_SIZE      = 4 + 16 + 1 + 16 + 17 * (2 + 16);
     
     public byte[] serialize() {
         ByteBuffer byteBuf = ByteBuffer.allocate(NODE_SIZE);
@@ -276,6 +341,7 @@ public class ZigBeeNode {
         byteBuf.put((byte)mIntNodeType);                    // type
         byteBuf.put(get16Bytes(mStrNodeName));              // name
         for (int i = 0; i < GPIO_CNT; i++) {
+            byteBuf.put((byte)getGpioUsage(i));             // gpio usage
             byteBuf.put((byte)getGpioMode(i));              // gpio mode
             byteBuf.put(get16Bytes(getGpioName(i)));        // gpio name
         }
@@ -317,12 +383,12 @@ public class ZigBeeNode {
         LogUtil.i("NAME:" + mStrNodeName);
         
         for (int i = 0; i < GPIO_CNT; i++) {
+            setGpioUsage(i, (int)byteBuf.get());    // gpio usage
             setGpioMode(i, (int)byteBuf.get());     // gpio mode
             byteBuf.get(bufDst, 0, 16);             // gpio name
             setGpioName(i, new String(bufDst).trim());
-            LogUtil.i("GPIO" + i + ", MODE:" + getGpioMode(i) + ", NAME:" + getGpioName(i));
+//            LogUtil.i("GPIO" + i + ", MODE:" + getGpioMode(i) + ", NAME:" + getGpioName(i));
         }
-        
         return 1;
     }
 }

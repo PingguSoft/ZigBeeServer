@@ -29,12 +29,9 @@ import android.widget.AdapterView.OnItemClickListener;
 
 import com.pinggusoft.zigbee_server.ServerApp;
 import com.pinggusoft.zigbee_server.R;
-import com.pinggusoft.zigbee_server.ActivityServerConfig.ProbeeHandler;
 
 
 public class ActivityDeviceConfig extends Activity  implements OnItemClickListener {
-    private final static int    SCAN_DONE     = ZigBeeNode.CB_LAST;
-  
     private ServerApp       mApp;
     private String          mStrLocalAddr = null;
     private String          mStrRemoteAddr = null;
@@ -55,8 +52,9 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         setContentView(R.layout.config_device);
       
         mApp    = (ServerApp)getApplication();
+        mApp.load();
         
-        mService = new ServerServiceUtil(getApplicationContext(), new Messenger(new ProbeeHandler(this)));
+        mService = new ServerServiceUtil(getApplicationContext(), new Messenger(new ServiceHandler(this)));
         mCommon  = new CommonUtils(this);
         
         mCommon.createGpioTable();
@@ -149,8 +147,9 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         mNode.setName(((TextView)findViewById(R.id.editNodeName)).getText().toString());
         mNode.setType(((Spinner)findViewById(R.id.spinnerNodeType)).getSelectedItemPosition());
         for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-            int mode = mCommon.getSpinnerUsages()[i].getSelectedItemPosition();
-            mNode.setGpioMode(i, mode);
+            int usage = mCommon.getSpinnerUsages()[i].getSelectedItemPosition();
+            mNode.setGpioUsage(i, usage);
+            mNode.setGpioMode(i, ZigBeeNode.getGpioModeFromUsage(usage));
             mNode.setGpioName(i, mCommon.getEditGpioNames()[i].getText().toString());
         }
         mApp.addNode(mNode, false);
@@ -184,11 +183,11 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         }
     }
     
-    static class ProbeeHandler extends Handler {
+    static class ServiceHandler extends Handler {
         private WeakReference<ActivityDeviceConfig> mParent;
         
-        ProbeeHandler(ActivityDeviceConfig activityOption) {
-            mParent = new WeakReference<ActivityDeviceConfig>(activityOption);
+        ServiceHandler(ActivityDeviceConfig parent) {
+            mParent = new WeakReference<ActivityDeviceConfig>(parent);
         }
 
         @Override

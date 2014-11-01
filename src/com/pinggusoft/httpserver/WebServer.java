@@ -1,8 +1,12 @@
 package com.pinggusoft.httpserver;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.http.HttpException;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
@@ -19,10 +23,15 @@ import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 
 import com.pinggusoft.zigbee_server.LogUtil;
+import com.pinggusoft.zigbee_server.ServerService;
+import com.pinggusoft.zigbee_server.ServerServiceUtil;
 
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.preference.PreferenceManager;
 
 public class WebServer extends Thread {
@@ -42,7 +51,10 @@ public class WebServer extends Thread {
     private HttpRequestHandlerRegistry registry = null;
     private NotificationManager notifyManager = null;
     private ServerSocket serverSocket = null;
+    private ServerServiceUtil   mService = null;
     
+    private Lock            mLockACK  = new ReentrantLock();
+    private Condition       mLockCond = mLockACK.newCondition();
     
     public WebServer(Context context, NotificationManager notifyManager){
         super(SERVER_NAME);
@@ -51,11 +63,10 @@ public class WebServer extends Thread {
         this.setNotifyManager(notifyManager);
         
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        
         serverPort = Integer.parseInt(pref.getString(Constants.PREF_SERVER_PORT, "" + Constants.DEFAULT_SERVER_PORT));
         LogUtil.d("SERVER PORT :" + serverPort);
         
-        httpproc = new BasicHttpProcessor();
+        httpproc    = new BasicHttpProcessor();
         httpContext = new BasicHttpContext();
         
         httpproc.addInterceptor(new ResponseDate());
@@ -64,17 +75,15 @@ public class WebServer extends Thread {
         httpproc.addInterceptor(new ResponseConnControl());
 
         httpService = new HttpService(httpproc, 
-                                            new DefaultConnectionReuseStrategy(),
-                                            new DefaultHttpResponseFactory());
-
+                                        new DefaultConnectionReuseStrategy(),
+                                        new DefaultHttpResponseFactory());
         
+        mService = new ServerServiceUtil(context, new Messenger(new ServiceHandler(this)));
         registry = new HttpRequestHandlerRegistry();
-        
         registry.register(ALL_PATTERN, new HomePageHandler(context));
-        registry.register(RPC_PATTERN, new RPCHandler(context));
+        registry.register(RPC_PATTERN, new RPCHandler(context, mService, mLockACK, mLockCond));
         registry.register(MESSAGE_PATTERN, new MessageCommandHandler(context, notifyManager));
         registry.register(FOLDER_PATTERN, new FolderCommandHandler(context, serverPort));
-        
         httpService.setHandlerResolver(registry);
     }
     
@@ -143,5 +152,28 @@ public class WebServer extends Thread {
 
     public Context getContext() {
         return context;
+    }
+    
+    static class ServiceHandler extends Handler {
+        private WeakReference<WebServer>    mParent;
+        
+        ServiceHandler(WebServer parent) {
+            mParent = new WeakReference<WebServer>(parent);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final WebServer parent = mParent.get();
+            
+            switch (msg.what) {
+            case ServerService.CMD_READ_GPIO:
+            case ServerService.CMD_WRITE_GPIO:
+            case ServerService.CMD_READ_ANALOG:
+                parent.mLockACK.lock();
+                parent.mLockCond.signal();
+                parent.mLockACK.unlock();
+                break;
+            }
+        }
     }
 }

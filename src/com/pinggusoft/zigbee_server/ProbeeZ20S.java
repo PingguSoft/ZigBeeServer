@@ -270,7 +270,7 @@ public class ProbeeZ20S {
 // REPORT:++000195000000735A|100101000*0000001|1826,****,****,****,****,****
                     if (!bDone && v.startsWith("++")) {
                         m_hCallback.obtainMessage(CB_REPORT, 0, 0, v).sendToTarget();
-                        LogUtil.d("REPORT:" + v);
+//                        LogUtil.d("REPORT:" + v);
                         byteBuf.clear();
                     }
                 }
