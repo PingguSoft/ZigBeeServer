@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.pinggusoft.httpserver.WebServer;
+import com.pinggusoft.httpserver.HTTPServer;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -33,24 +33,25 @@ public class ServerService extends Service {
     
     private static final int    NOTIFICATION_STARTED_ID = 1;
     
-    public static final int     RPT_DIO_CHANGED       = ProbeeZ20S.CB_REPORT;
-    public static final int     CMD_REGISTER_CLIENT   = ProbeeZ20S.CB_END + 0;
-    public static final int     CMD_UNREGISTER_CLIENT = ProbeeZ20S.CB_END + 1;
-    public static final int     CMD_BT_DEVICE_CHANGED = ProbeeZ20S.CB_END + 2;
-    public static final int     CMD_READ_INFO         = ProbeeZ20S.CB_END + 3;
-    public static final int     CMD_WRITE_INFO        = ProbeeZ20S.CB_END + 4;
-    public static final int     CMD_READ_GPIO         = ProbeeZ20S.CB_END + 5;
-    public static final int     CMD_WRITE_GPIO        = ProbeeZ20S.CB_END + 6;
-    public static final int     CMD_READ_ANALOG       = ProbeeZ20S.CB_END + 7;
-    public static final int     CMD_SCAN              = ProbeeZ20S.CB_END + 8;
-    public static final int     CMD_GET_SERVER_ADDR   = ProbeeZ20S.CB_END + 9;
+    public static final int     RPT_DIO_CHANGED         = ProbeeZ20S.CB_REPORT;
+    public static final int     CMD_BT_DEVICE_CHANGED   = ProbeeZ20S.CB_END + 0;
+    public static final int     CMD_SERVER_PORT_CHANGED = ProbeeZ20S.CB_END + 1;
+    public static final int     CMD_REGISTER_CLIENT     = ProbeeZ20S.CB_END + 2;
+    public static final int     CMD_UNREGISTER_CLIENT   = ProbeeZ20S.CB_END + 3;
+    public static final int     CMD_READ_INFO           = ProbeeZ20S.CB_END + 4;
+    public static final int     CMD_WRITE_INFO          = ProbeeZ20S.CB_END + 5;
+    public static final int     CMD_READ_GPIO           = ProbeeZ20S.CB_END + 6;
+    public static final int     CMD_WRITE_GPIO          = ProbeeZ20S.CB_END + 7;
+    public static final int     CMD_READ_ANALOG         = ProbeeZ20S.CB_END + 8;
+    public static final int     CMD_SCAN                = ProbeeZ20S.CB_END + 9;
+    public static final int     CMD_GET_SERVER_ADDR     = ProbeeZ20S.CB_END + 10;
     
-    private ArrayList<Messenger> mClients   = new ArrayList<Messenger>();
-    private final Messenger      mMessenger = new Messenger(new IncomingHandler());
-    private MessageManager       mMessageManager;
-    private ProbeeZ20S           mProbee = null;
-    private WebServer            mWebServer = null;
-    private NotificationManager  mNotifyManager = null;
+    private ArrayList<Messenger>    mClients   = new ArrayList<Messenger>();
+    private final Messenger         mMessenger = new Messenger(new IncomingHandler());
+    private MessageManager          mMessageManager;
+    private ProbeeZ20S              mProbee = null;
+    private HTTPServer              mHTTPServer = null;
+    private NotificationManager     mNotifyManager = null;
 
     /*
      ******************************************************************************************************************
@@ -73,8 +74,8 @@ public class ServerService extends Service {
             BluetoothDevice device =  BluetoothAdapter.getDefaultAdapter().getRemoteDevice(strAddr);
             mProbee.connect(device);
         }
-        mWebServer = new WebServer(getApplicationContext(), mNotifyManager);
-        mWebServer.startThread();
+        mHTTPServer = new HTTPServer(getApplicationContext(), mNotifyManager);
+        mHTTPServer.startThread();
     }
 
     private void showNotification() {
@@ -105,8 +106,8 @@ public class ServerService extends Service {
     public void onDestroy() {
         super.onDestroy();
 
-        if (mWebServer != null)
-            mWebServer.stopThread();
+        if (mHTTPServer != null)
+            mHTTPServer.stopThread();
         
         if (mProbee != null)
             mProbee.stop();
@@ -150,6 +151,19 @@ public class ServerService extends Service {
                     mProbee.connect(device);
                 }
                 break;
+                
+            case CMD_SERVER_PORT_CHANGED:
+                if (mHTTPServer != null) {
+                    mHTTPServer.stopThread();
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    mHTTPServer = new HTTPServer(getApplicationContext(), mNotifyManager);
+                    mHTTPServer.startThread();
+                }
+                break;
 
             default:
                 mMessageManager.offer(Message.obtain(msg));
@@ -162,14 +176,6 @@ public class ServerService extends Service {
         for (int i = mClients.size() - 1; i >= 0; i--) {
             try {
                 mClients.get(i).send(Message.obtain(null, what, arg1, arg2, obj));
-
-/*                
-                Bundle b = new Bundle();
-                b.putString("str1", "ab" + intvaluetosend + "cd");
-                Message msg = Message.obtain(null, MSG_SET_STRING_VALUE);
-                msg.setData(b);
-                mClients.get(i).send(msg);
-*/
             } catch (RemoteException e) {
                 // The client is dead. Remove it from the list; 
                 // we are going through the list from back to front so this is safe to do inside the loop.
@@ -326,14 +332,28 @@ public class ServerService extends Service {
         if (!mProbee.isConnected())
             return;
 
-        String strCmds[] = new String[4];
+        String strCmds[] = new String[7];
         strCmds[0] = String.format(ProbeeZ20S.CMD_SET_NODE_NAME, node.getName());
         strCmds[1] = String.format(ProbeeZ20S.CMD_SET_NODE_TYPE, node.getType());
         strCmds[2] = String.format(ProbeeZ20S.CMD_SET_GPIOS_MODE, node.getGpioMode());
-        strCmds[3] = ProbeeZ20S.CMD_RESET;
+        
+
     
-        String strCmd = null;
-        int    nCtr = node.isRemote() ? strCmds.length : strCmds.length - 1;
+        String      strCmd = null;
+        int         nCtr = 3;
+        ZigBeeNode  nodeServer = null;
+        
+        if (node.isRemote()) {
+            nodeServer = ((ServerApp)getApplication()).getLocalNode();
+            if (nodeServer != null) {
+                strCmds[3] = String.format(ProbeeZ20S.CMD_SET_DEST, nodeServer.getAddr());
+                strCmds[4] = String.format(ProbeeZ20S.CMD_SET_ATS43, 0);
+                strCmds[5] = String.format(ProbeeZ20S.CMD_SET_ATS44, 1);
+                strCmds[6] = ProbeeZ20S.CMD_RESET;
+                nCtr = strCmds.length;
+            }
+        }
+        
         for (int i = 0; i < nCtr; i++) {
             if (node.isRemote())
                 strCmd = new String(String.format(ProbeeZ20S.CMD_REMOTE, node.getAddr(), strCmds[i]));

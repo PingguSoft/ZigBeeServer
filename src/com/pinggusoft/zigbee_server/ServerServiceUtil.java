@@ -107,6 +107,10 @@ public class ServerServiceUtil {
         sendMessageToService(ServerService.CMD_BT_DEVICE_CHANGED, 0, 0, addr);
     }
     
+    public void asyncChangeServerPort(int port) {
+        sendMessageToService(ServerService.CMD_SERVER_PORT_CHANGED, port, 0, null);
+    }    
+    
     public void asyncReadInfo(int id, ZigBeeNode node) {
         sendMessageToService(ServerService.CMD_READ_INFO, id, 0, node);
     }

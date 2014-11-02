@@ -22,6 +22,8 @@
     <string name="main_server_config_desc">서버 어플리케이션 환경을 설정합니다</string>
     <string name="main_device_config">원격 디바이스 설정</string>
     <string name="main_device_config_desc">원격 디바이스를 설정합니다</string>
+    <string name="main_rule_config">룰 편집</string>
+    <string name="main_rule_config_desc">룰을 편집합니다</string>
     
     <string name="main_etc_section">기  타</string>
     <string name="main_purchase">구  매</string>
@@ -37,10 +39,10 @@
     <string name="main_inapp_query_fail">어플리케이션 결제 확인 오류 !</string>
     <string name="main_free_timeout">무료 평가 기간(24시간)이 지났습니다</string>
     <string name="main_authorized">개발자 폰 !!</string>
-    
     <string name="main_service_started">ZigBee Server가 시작됐습니다"</string>
 
-    <!-- BTCon Config -->
+    <!-- Server Config -->
+    <string name="config_server_port">Server Port</string>
     <string name="config_bt_zigbee_combo">Bluetooth ZigBee Combo</string>
     <string name="config_selBT">Bluetooth 장치 선택</string>
     <string name="config_zigbee">ZigBee 설정</string>

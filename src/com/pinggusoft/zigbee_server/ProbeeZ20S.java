@@ -33,7 +33,9 @@ public class ProbeeZ20S {
     public static final String CMD_SET_GPIO_VALUE   = "at+dio%d=%d\n";
     public static final String CMD_GET_AIS_VALUE    = "at+ai?\n";
     public static final String CMD_GET_AI_VALUE     = "at+ai%d?\n";
-    
+    public static final String CMD_SET_DEST         = "at+dl=%s\n";
+    public static final String CMD_SET_ATS43        = "ats43=%d\n";
+    public static final String CMD_SET_ATS44        = "ats44=%d\n";
 
     public static final String CMD_REMOTE           = "at+rc=%s,%s";
     public static final String CMD_ESCAPE_DATA      = "+++";

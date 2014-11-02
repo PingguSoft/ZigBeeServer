@@ -23,18 +23,17 @@ import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 
 import com.pinggusoft.zigbee_server.LogUtil;
+import com.pinggusoft.zigbee_server.ServerApp;
 import com.pinggusoft.zigbee_server.ServerService;
 import com.pinggusoft.zigbee_server.ServerServiceUtil;
 
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.preference.PreferenceManager;
 
-public class WebServer extends Thread {
+public class HTTPServer extends Thread {
     private static final String SERVER_NAME = "AndWebServer";
     private static final String ALL_PATTERN = "*";
     private static final String MESSAGE_PATTERN = "/message*";
@@ -53,19 +52,15 @@ public class WebServer extends Thread {
     private ServerSocket serverSocket = null;
     private ServerServiceUtil   mService = null;
     
-    private Lock            mLockACK  = new ReentrantLock();
-    private Condition       mLockCond = mLockACK.newCondition();
+    private Lock            mLockACK  = null;
+    private Condition       mLockCond = null;
     
-    public WebServer(Context context, NotificationManager notifyManager){
+    public HTTPServer(Context context, NotificationManager notifyManager){
         super(SERVER_NAME);
         
         this.setContext(context);
         this.setNotifyManager(notifyManager);
-        
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        serverPort = Integer.parseInt(pref.getString(Constants.PREF_SERVER_PORT, "" + Constants.DEFAULT_SERVER_PORT));
-        LogUtil.d("SERVER PORT :" + serverPort);
-        
+
         httpproc    = new BasicHttpProcessor();
         httpContext = new BasicHttpContext();
         
@@ -77,6 +72,9 @@ public class WebServer extends Thread {
         httpService = new HttpService(httpproc, 
                                         new DefaultConnectionReuseStrategy(),
                                         new DefaultHttpResponseFactory());
+        
+        mLockACK  = new ReentrantLock();
+        mLockCond = mLockACK.newCondition();
         
         mService = new ServerServiceUtil(context, new Messenger(new ServiceHandler(this)));
         registry = new HttpRequestHandlerRegistry();
@@ -93,6 +91,9 @@ public class WebServer extends Thread {
         
         try {
             LogUtil.d("WEBSERVER IS STARTED !!");
+            serverPort = ((ServerApp)context).getServerPort();
+            LogUtil.d("SERVER PORT :" + serverPort);
+            
             serverSocket = new ServerSocket(serverPort);
             serverSocket.setReuseAddress(true);
             
@@ -122,7 +123,6 @@ public class WebServer extends Thread {
     
     public synchronized void startThread() {
         isRunning = true;
-        
         super.start();
     }
     
@@ -155,23 +155,25 @@ public class WebServer extends Thread {
     }
     
     static class ServiceHandler extends Handler {
-        private WeakReference<WebServer>    mParent;
+        private WeakReference<HTTPServer>    mParent;
         
-        ServiceHandler(WebServer parent) {
-            mParent = new WeakReference<WebServer>(parent);
+        ServiceHandler(HTTPServer parent) {
+            mParent = new WeakReference<HTTPServer>(parent);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            final WebServer parent = mParent.get();
+            final HTTPServer parent = mParent.get();
             
             switch (msg.what) {
             case ServerService.CMD_READ_GPIO:
             case ServerService.CMD_WRITE_GPIO:
             case ServerService.CMD_READ_ANALOG:
-                parent.mLockACK.lock();
-                parent.mLockCond.signal();
-                parent.mLockACK.unlock();
+                if (parent.mLockACK != null && parent.mLockCond != null){
+                    parent.mLockACK.lock();
+                    parent.mLockCond.signal();
+                    parent.mLockACK.unlock();
+                }
                 break;
             }
         }

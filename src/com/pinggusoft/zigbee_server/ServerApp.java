@@ -31,21 +31,23 @@ public class ServerApp extends Application {
     private final static String KEY_BTDEVICE           = "KEY_BTDEVICE";
     private final static String KEY_INSTALL_TIME       = "KEY_INSTALL_TIME";
     private final static String KEY_INSTALL_VER        = "KEY_INSTALL_VER";
+    private final static String KEY_SERVER_PORT        = "KEY_SERVER_PORT";
 
     public String   m_strBTDevice = null;
     public String   m_strBTAddr = null;
     private long    m_lFirstInstallTime;
     private String  m_strVer;
-    private SharedPreferences m_spBTCon;
-    private Editor  m_editorBTCon;
+    private SharedPreferences m_prefApp;
+    private Editor  m_prefEditorApp;
+    private int     m_nServerPort;
     
     @Override
     public void onCreate() {
         super.onCreate();
        
         LogUtil.initialize(this);
-        m_spBTCon = PreferenceManager.getDefaultSharedPreferences(this);
-        m_editorBTCon = m_spBTCon.edit();
+        m_prefApp = PreferenceManager.getDefaultSharedPreferences(this);
+        m_prefEditorApp = m_prefApp.edit();
         readSettings();
     }
     
@@ -58,16 +60,17 @@ public class ServerApp extends Application {
     }
     
     public void readSettings() {
-        m_strBTDevice = m_spBTCon.getString(KEY_BTDEVICE, null);
+        m_strBTDevice = m_prefApp.getString(KEY_BTDEVICE, null);
         if (m_strBTDevice != null)
             m_strBTAddr = m_strBTDevice.substring(m_strBTDevice.length() - 17);
         
         getInstalledTime();
-        m_strVer = m_spBTCon.getString(KEY_INSTALL_VER, null);
+        m_strVer      = m_prefApp.getString(KEY_INSTALL_VER, null);
+        m_nServerPort = m_prefApp.getInt(KEY_SERVER_PORT, 7070);
     }
     
     private void getInstalledTime() {
-        long lInstallTimeSP = m_spBTCon.getLong(KEY_INSTALL_TIME, -1);
+        long lInstallTimeSP = m_prefApp.getLong(KEY_INSTALL_TIME, -1);
         
         ByteBuffer  byteBuf = ByteBuffer.allocate(8);
         byteBuf.order(ByteOrder.LITTLE_ENDIAN);
@@ -89,8 +92,8 @@ public class ServerApp extends Application {
             
             if (lInstallTimeSP == -1) {
                 // app is un-installed, use time of .noctb
-                m_editorBTCon.putLong(KEY_INSTALL_TIME, m_lFirstInstallTime);
-                m_editorBTCon.commit();
+                m_prefEditorApp.putLong(KEY_INSTALL_TIME, m_lFirstInstallTime);
+                m_prefEditorApp.commit();
                 LogUtil.e("app in un-installed, use file :" + getTimeString(m_lFirstInstallTime));
             } else if (lInstallTimeSP != m_lFirstInstallTime) {
                 // different time, use min time
@@ -106,8 +109,8 @@ public class ServerApp extends Application {
             if (lInstallTimeSP == -1) {
                 // real first install
                 m_lFirstInstallTime = System.currentTimeMillis();
-                m_editorBTCon.putLong(KEY_INSTALL_TIME,  m_lFirstInstallTime);
-                m_editorBTCon.commit();
+                m_prefEditorApp.putLong(KEY_INSTALL_TIME,  m_lFirstInstallTime);
+                m_prefEditorApp.commit();
                 LogUtil.e("real first install!!:" + getTimeString(m_lFirstInstallTime));
             } else {
                 // .noctb is removed
@@ -128,8 +131,9 @@ public class ServerApp extends Application {
     }
 
     public void saveSettings() {
-        m_editorBTCon.putString(KEY_BTDEVICE, m_strBTDevice);
-        m_editorBTCon.commit();
+        m_prefEditorApp.putString(KEY_BTDEVICE, m_strBTDevice);
+        m_prefEditorApp.putInt(KEY_SERVER_PORT, m_nServerPort);
+        m_prefEditorApp.commit();
         
         if (m_strBTDevice != null)
             m_strBTAddr = m_strBTDevice.substring(m_strBTDevice.length() - 17);
@@ -140,6 +144,17 @@ public class ServerApp extends Application {
         super.onTerminate();
     }
     
+    // Server Settings
+    public int getServerPort() {
+        return m_nServerPort;
+    }
+    
+    public void setServerPort(int port) {
+        m_nServerPort = port;
+        saveSettings();
+    }
+    
+    // Bluetooth Settings
     public void setBTDevice(String device) {
         m_strBTDevice = device;
 
@@ -155,6 +170,8 @@ public class ServerApp extends Application {
         return m_strBTAddr;
     }
     
+    
+    // App Version and expiration
     public boolean IsExpired() {
         getInstalledTime();
         
@@ -170,8 +187,8 @@ public class ServerApp extends Application {
 
     public void testExpire() {
         m_lFirstInstallTime -= (1000 * 60 * 60 * 24);
-        m_editorBTCon.putLong(KEY_INSTALL_TIME,  m_lFirstInstallTime);
-        m_editorBTCon.commit();
+        m_prefEditorApp.putLong(KEY_INSTALL_TIME,  m_lFirstInstallTime);
+        m_prefEditorApp.commit();
     }
     
     public String getInstVer() {
@@ -180,8 +197,8 @@ public class ServerApp extends Application {
     
     public void setInstVer(String strVer) {
         m_strVer = strVer;
-        m_editorBTCon.putString(KEY_INSTALL_VER, m_strVer);
-        m_editorBTCon.commit();
+        m_prefEditorApp.putString(KEY_INSTALL_VER, m_strVer);
+        m_prefEditorApp.commit();
     }
     
     public String getPackageVer() {
@@ -291,6 +308,18 @@ public class ServerApp extends Application {
         for (int i = 0; i < mNodeList.size(); i++) {
             n = mNodeList.get(i);
             if (addr.equals(n.getAddr())) {
+                return n;
+            }
+        }
+        return null;
+    }
+    
+    public ZigBeeNode getLocalNode() {
+        ZigBeeNode n;
+
+        for (int i = 0; i < mNodeList.size(); i++) {
+            n = mNodeList.get(i);
+            if (!n.isRemote()) {
                 return n;
             }
         }

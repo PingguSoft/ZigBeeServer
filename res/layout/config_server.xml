@@ -13,7 +13,27 @@
         android:focusable="true"
         android:focusableInTouchMode="true">
 
-
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/smalltittle"
+            android:gravity="center_vertical"
+            android:layout_marginTop="15dip"
+            android:paddingLeft="10dp"
+            android:text="@string/config_server_port"
+            android:textColor="@color/smalltittleText"
+            android:textStyle="bold" />
+        
+        <EditText
+            android:id="@+id/editServerPort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:inputType="numberDecimal"
+            android:maxLength="5"
+            android:minLines="1" />
+    
 <!-- BT section -->
         <TextView
             android:layout_width="match_parent"

@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import com.pinggusoft.zigbee_server.ServerApp;
@@ -71,12 +72,20 @@ public class ActivityServerConfig extends Activity {
         }
         
         mTextBTAddr.setText(mApp.getBTDevice());
+        ((EditText)findViewById(R.id.editServerPort)).setText(String.valueOf(mApp.getServerPort()));
     }
     
     @Override
     public synchronized void onPause() {
         super.onPause();
-        mApp.saveSettings();
+
+        int nPort = Integer.valueOf(((EditText)findViewById(R.id.editServerPort)).getText().toString());
+        int nOldPort = mApp.getServerPort();
+        mApp.setServerPort(nPort);
+        if (nPort != nOldPort) {
+            mService.asyncChangeServerPort(nPort);
+        }
+        //mApp.saveSettings();
     }
 
     @Override

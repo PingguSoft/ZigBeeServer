@@ -35,28 +35,22 @@ import android.widget.TextView;
 import android.widget.Toast;
     
 public class ActivityMain extends Activity {
-    private static final int RC_REQUEST = 10001;
-    private static final String SKU_PRODUCT = "com.pinggusoft.btcon";
-    
     private static final int ID_SERVER_SETTING   = 0x00;
     private static final int ID_DEVICE_SETTING   = 0x01;
-    private static final int ID_TEST             = 0x02;
-    private static final int ID_CLIENT           = 0x04;
+    private static final int ID_RULE_SETTING     = 0x02;
+    private static final int ID_TEST             = 0x03;
     private static final int ID_PURCHASE         = 0x05;
     private static final int ID_NOTICE           = 0x06;
     private static final int ID_QUIT             = 0x07;
     
     private ServerApp  app;
-    private boolean   mIsPurchased = true;
-    private IabHelper mHelper;
     
     // Local Bluetooth adapter
-    private BluetoothAdapter mBluetoothAdapter = null;
-    private static boolean mBluetoothEnabled = false;
-    private ArrayList<Item> items = new ArrayList<Item>();
-    private ListView mListView = null;
-    private EntryItem mPurchaseItem = null;
-    private boolean   mStart = true;
+    private BluetoothAdapter    mBluetoothAdapter = null;
+    private static boolean      mBluetoothEnabled = false;
+    private ArrayList<Item>     items = new ArrayList<Item>();
+    private ListView            mListView = null;
+    private boolean             mStart = false;
    
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,24 +61,22 @@ public class ActivityMain extends Activity {
         app.load();
         Intent intent = new Intent(ActivityMain.this, ServerService.class);
         startService(intent);
-        
         mListView = (ListView)findViewById(R.id.listView);
         
         items.add(new SectionItem(getString(R.string.main_btcon_config_section)));
-        items.add(new EntryItem(R.drawable.icon_settings, getString(R.string.main_server_config), 
+        items.add(new EntryItem(R.drawable.icon_server_48, getString(R.string.main_server_config), 
                 getString(R.string.main_server_config_desc), ID_SERVER_SETTING));
-        items.add(new EntryItem(R.drawable.icon_multiwii, getString(R.string.main_device_config), 
+        items.add(new EntryItem(R.drawable.icon_remote_device_48, getString(R.string.main_device_config), 
                 getString(R.string.main_device_config_desc), ID_DEVICE_SETTING));
-        
+        items.add(new EntryItem(R.drawable.icon_rule_48, getString(R.string.main_rule_config), 
+                getString(R.string.main_rule_config_desc), ID_RULE_SETTING));
+
         items.add(new SectionItem(getString(R.string.main_etc_section)));
-        items.add(new EntryItem(R.drawable.icon_multiwii, "TEST", 
+        items.add(new EntryItem(R.drawable.icon_test_48, "TEST", 
                 getString(R.string.main_device_config_desc), ID_TEST));
 //        items.add(new EntryItem(R.drawable.icon_multiwii, "CLIENT", 
 //                getString(R.string.main_device_config_desc), ID_CLIENT));
         
-        mPurchaseItem = new EntryItem(R.drawable.icon_purchase, getString(R.string.main_purchase), 
-                getString(R.string.main_purchase_desc), ID_PURCHASE); 
-        items.add(mPurchaseItem);
         items.add(new EntryItem(R.drawable.icon_notice, getString(R.string.main_notice), 
                 getString(R.string.main_notice_desc), ID_NOTICE));
         items.add(new EntryItem(R.drawable.icon_quit, getString(R.string.main_quit), 
@@ -116,10 +108,6 @@ public class ActivityMain extends Activity {
                         
                     case ID_DEVICE_SETTING:
                         onClickDeviceConfig(null);
-                        break;
-                        
-                    case ID_PURCHASE:
-                        onClickPurchase(null);
                         break;
                         
                     case ID_NOTICE:
@@ -158,37 +146,6 @@ public class ActivityMain extends Activity {
             finish();
             return;
         }
-
-        String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAowry+1jfMdRZlz2gDrc3gkzwKtNyuFdwm+Pk2y+IyE2D67m17I4ZAq0zlhkJSU2NrSA6Su/3GPXVv412zIk3vveMVS4SwqTBhDVfJQek9YRWPVNOMJZBVA5j+C1T5ekdippU1I6fG/q1+NmdInE5xdk4K1bBNlHYZL40eZ6X2ejf7zi9RIthTPqM7c+Nl52GInbPRT0nlFgC9HUGDIMegiLtYiWSdlTFTUz5/Re8/ieM3bH6KXF289ZbsExZTJXvM6Io44D5Pf41XeSiVhGktvs8Chk0YZQ/h5S/4G+WpQ7TlgXhmsPQ91RVR49sUKLk1rh44urQbJ5kpptd2OLwOQIDAQAB";
-        LogUtil.e("Creating IAB helper.");
-        mHelper = new IabHelper(this, base64EncodedPublicKey);
-
-        // enable debug logging (for a production application, you should set this to false).
-        mHelper.enableDebugLogging(BuildConfig.DEBUG ? true : false);
-
-        // Start setup. This is asynchronous and the specified listener
-        // will be called once setup completes.
-        LogUtil.e("Starting setup.");
-        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
-            public void onIabSetupFinished(IabResult result) {
-                LogUtil.e("Setup finished.");
-
-                if (!result.isSuccess()) {
-                    // Oh noes, there was a problem.
-                    complain(getResources().getString(R.string.main_inapp_setting_fail) + " " + result);
-                    mIsPurchased = false;
-                    return;
-                }
-
-                // Have we been disposed of in the meantime? If so, quit.
-                if (mHelper == null) 
-                    return;
-
-                // IAB is fully set up. Now, let's get an inventory of stuff we own.
-                LogUtil.e("Setup successful. Querying inventory.");
-                mHelper.queryInventoryAsync(mGotInventoryListener);
-            }
-        });
     }
     
     @Override
@@ -222,8 +179,6 @@ public class ActivityMain extends Activity {
             TextView abTitle = (TextView) findViewById(titleId);
             abTitle.setTextColor(Color.WHITE);
         }
-        
-        updateButtons(mIsPurchased);
     }
     
     @Override
@@ -239,13 +194,6 @@ public class ActivityMain extends Activity {
         if (mBluetoothEnabled == false) {
             mBluetoothAdapter.disable();
             LogUtil.e("BT disable !!!!");
-        }
-        
-        // very important:
-        LogUtil.e("Destroying helper.");
-        if (mHelper != null) {
-            mHelper.dispose();
-            mHelper = null;
         }
     }
     
@@ -290,125 +238,6 @@ public class ActivityMain extends Activity {
     public void onClickQuit(View v) {
         finish();
     }    
-    
-    
-    //
-    // In-App Billing
-    //
-
-    public void onClickPurchase(View v) {
-        LogUtil.e("Buy button clicked; launching purchase flow for upgrade.");
-
-        /* TODO: for security, generate your payload here for verification. See the comments on
-         *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
-         *        an empty string, but on a production app you should carefully generate this. */
-        String payload = String.valueOf(System.currentTimeMillis());
-
-        mHelper.launchPurchaseFlow(this, SKU_PRODUCT, RC_REQUEST,
-                mPurchaseFinishedListener, payload);
-    }
-    
-    // Listener that's called when we finish querying the items and subscriptions we own
-    IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
-        public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
-            LogUtil.e("Query inventory finished.");
-
-            // Have we been disposed of in the meantime? If so, quit.
-            if (mHelper == null) return;
-
-            // Is it a failure?
-            if (result.isFailure()) {
-                complain(getResources().getString(R.string.main_inapp_query_fail) + " : " + result);
-                return;
-            }
-
-            LogUtil.e("Query inventory was successful.");
-
-            /*
-             * Check for items we own. Notice that for each purchase, we check
-             * the developer payload to see if it's correct! See
-             * verifyDeveloperPayload().
-             */
-            Purchase premiumPurchase = inventory.getPurchase(SKU_PRODUCT);
-            mIsPurchased = (premiumPurchase != null && verifyDeveloperPayload(premiumPurchase));
-            LogUtil.e("Product is " + (mIsPurchased ? "Purchased" : "not purchased"));
-            updateButtons(mIsPurchased);
-        }
-    };
-    
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        LogUtil.e("onActivityResult(" + requestCode + "," + resultCode + "," + data);
-        if (mHelper == null) return;
-
-        // Pass on the activity result to the helper for handling
-        if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
-            // not handled, so handle it ourselves (here's where you'd
-            // perform any handling of activity results not related to in-app
-            // billing...
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-        else {
-            LogUtil.e("onActivityResult handled by IABUtil.");
-        }
-    }
-
-    /** Verifies the developer payload of a purchase. */
-    boolean verifyDeveloperPayload(Purchase p) {
-        String payload = p.getDeveloperPayload();
-
-        /*
-         * TODO: verify that the developer payload of the purchase is correct. It will be
-         * the same one that you sent when initiating the purchase.
-         *
-         * WARNING: Locally generating a random string when starting a purchase and
-         * verifying it here might seem like a good approach, but this will fail in the
-         * case where the user purchases an item on one device and then uses your app on
-         * a different device, because on the other device you will not have access to the
-         * random string you originally generated.
-         *
-         * So a good developer payload has these characteristics:
-         *
-         * 1. If two different users purchase an item, the payload is different between them,
-         *    so that one user's purchase can't be replayed to another user.
-         *
-         * 2. The payload must be such that you can verify it even when the app wasn't the
-         *    one who initiated the purchase flow (so that items purchased by the user on
-         *    one device work on other devices owned by the user).
-         *
-         * Using your own server to store and verify developer payloads across app
-         * installations is recommended.
-         */
-        LogUtil.e("Payload:" + payload);
-
-        return true;
-    }
-
-    // Callback for when a purchase is finished
-    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
-        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
-            LogUtil.e("Purchase finished: " + result + ", purchase: " + purchase);
-
-            // if we were disposed of in the meantime, quit.
-            if (mHelper == null) return;
-
-            if (result.isFailure()) {
-                complain(getResources().getString(R.string.main_inapp_fail) + " : " + result);
-                return;
-            }
-            if (!verifyDeveloperPayload(purchase)) {
-                complain(getResources().getString(R.string.main_inapp_fail) + " : " + getResources().getString(R.string.main_inapp_auth_fail));
-                return;
-            }
-
-            LogUtil.e("Purchase successful.");
-            if (purchase.getSku().equals(SKU_PRODUCT)) {
-                alert(R.string.main_inapp_success);
-                mIsPurchased = true;
-                updateButtons(mIsPurchased);
-            }
-        }
-    };
     
     void complain(String strMsg) {
         LogUtil.e(strMsg);
@@ -472,15 +301,6 @@ public class ActivityMain extends Activity {
             alert(R.string.main_authorized);
             boolPurchased = true;
         }
-
-        if (boolPurchased) {
-            removeItemById(ID_PURCHASE);
-            mBoolRemoved = true;
-        } else if (mBoolRemoved) {
-            items.add(8, mPurchaseItem);
-            mBoolRemoved = false;
-        }
-
         if (!boolPurchased && app.IsExpired()) {
             alert(R.string.main_free_timeout);
             boolEnable = false;

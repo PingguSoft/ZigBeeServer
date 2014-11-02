@@ -207,7 +207,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
                 ((TextView)parent.findViewById(R.id.editNodeName)).setText(info.getName());
                 ((Spinner)parent.findViewById(R.id.spinnerNodeType)).setSelection(info.getType());
                 for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
-                    parent.mCommon.getSpinnerUsages()[i].setSelection(info.getGpioMode(i));
+                    parent.mCommon.getSpinnerUsages()[i].setSelection(info.getGpioUsage(i));
                     parent.mCommon.getEditGpioNames()[i].setText(info.getGpioName(i));
                 }
                 break;
