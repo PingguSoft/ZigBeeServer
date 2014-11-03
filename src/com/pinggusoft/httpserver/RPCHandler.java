@@ -114,10 +114,10 @@ public class RPCHandler implements HttpRequestHandler {
                 return new JSONRPC2Response(val, req.getID());
             } else if (req.getMethod().equals("getNode")) {
                 Map<String, Object> params = req.getNamedParams();
-                long idx = (long)params.get("idx");
+                int idx = ((Long)params.get("idx")).intValue();
                 
                 ServerApp app = (ServerApp)context;
-                ZigBeeNode node = app.getNode((int)idx);
+                ZigBeeNode node = app.getNode(idx);
                 
                 Map<String, Object> param = new HashMap<String,Object>();
                 param.put("node", node.serialize());
@@ -136,7 +136,7 @@ public class RPCHandler implements HttpRequestHandler {
         }
         
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-            long id;
+            int  id;
             int  gpio;
             int  idx;
             ZigBeeNode node;
@@ -144,11 +144,11 @@ public class RPCHandler implements HttpRequestHandler {
             if (req.getMethod().equals("asyncReadGpio")) {
                 Map<String, Object> params = req.getNamedParams();
                 
-                id   = (long)params.get("id");
+                id   = ((Long)params.get("id")).intValue();
                 gpio = (int)id & 0xffff;
                 idx  = (int)id >> 16;
                 node = ((ServerApp)context).getNode((int)idx);
-                mService.asyncReadGpio((int)id, node);
+                mService.asyncReadGpio(id, node);
                 
                 mLockACK.lock();
                 boolean boolRet = false;
@@ -167,7 +167,7 @@ public class RPCHandler implements HttpRequestHandler {
             } else if (req.getMethod().equals("asyncReadAnalog")) {
                 Map<String, Object> params = req.getNamedParams();
                 
-                id   = (long)params.get("id");
+                id   = ((Long)params.get("id")).intValue();
                 gpio = (int)id & 0xffff;
                 idx  = (int)id >> 16;
                 node = ((ServerApp)context).getNode((int)idx);
@@ -200,8 +200,8 @@ public class RPCHandler implements HttpRequestHandler {
         }
         
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-            long id;
-            long value;
+            int  id;
+            int  value;
             int  gpio;
             int  idx;
             ZigBeeNode node;
@@ -209,8 +209,8 @@ public class RPCHandler implements HttpRequestHandler {
             if (req.getMethod().equals("asyncWriteGpio")) {
                 Map<String, Object> params = req.getNamedParams();
 
-                id    = (long)params.get("id");
-                value = (long)params.get("value");
+                id    = ((Long)params.get("id")).intValue();
+                value = ((Long)params.get("value")).intValue();
                 gpio  = (int)id & 0xffff;
                 idx   = (int)id >> 16;
                 node  = ((ServerApp)context).getNode((int)idx);
