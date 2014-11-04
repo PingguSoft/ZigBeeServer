@@ -1,6 +1,7 @@
 package com.pinggusoft.zigbee_server;
 
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -9,12 +10,14 @@ import com.pinggusoft.billing.util.IabResult;
 import com.pinggusoft.billing.util.Inventory;
 import com.pinggusoft.billing.util.Purchase;
 import com.pinggusoft.zigbee_server.R;
+import com.pinggusoft.zigbee_server.ActivityServerConfig.ServiceHandler;
 import com.pinggusoft.httpserver.RPCServer;
 import com.pinggusoft.listitem.EntryAdapter;
 import com.pinggusoft.listitem.EntryItem;
 import com.pinggusoft.listitem.EntrySelItem;
 import com.pinggusoft.listitem.Item;
 import com.pinggusoft.listitem.SectionItem;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
@@ -24,6 +27,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
@@ -51,6 +57,7 @@ public class ActivityMain extends Activity {
     private ArrayList<Item>     items = new ArrayList<Item>();
     private ListView            mListView = null;
     private boolean             mStart = false;
+    //private ServerServiceUtil   mService = null;
    
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,8 +66,12 @@ public class ActivityMain extends Activity {
         setContentView(R.layout.main_list_view);
 
         app.load();
-        Intent intent = new Intent(ActivityMain.this, ServerService.class);
-        startService(intent);
+        
+//        Intent intent = new Intent(ActivityMain.this, ServerService.class);
+//        startService(intent);
+//        mStart = true;
+        //mService = new ServerServiceUtil(getApplicationContext(), new Messenger(new ServiceHandler(this)));
+        
         mListView = (ListView)findViewById(R.id.listView);
         
         items.add(new SectionItem(getString(R.string.main_btcon_config_section)));
@@ -110,13 +121,19 @@ public class ActivityMain extends Activity {
                         onClickDeviceConfig(null);
                         break;
                         
+                    case ID_RULE_SETTING:
+                        onClickRuleConfig(null);
+                        break;
+                        
                     case ID_NOTICE:
                         onClickNotice(null);
                         break;
                         
                     case ID_QUIT:
-                        if (mStart)
+                        if (mStart) {
+//                            mService.unbind();
                             stopService(intent);
+                        }
                         
                         onClickQuit(null);
                         break;
@@ -125,8 +142,11 @@ public class ActivityMain extends Activity {
                     case ID_TEST:
                         LogUtil.e("Service Running :" + mStart);
                         if (mStart) {
+//                            mService.unbind();
+//                            
                             stopService(intent);
                         } else {
+//                            mService.bind();
                             startService(intent);
                         }
                         mStart = !mStart;
@@ -195,6 +215,11 @@ public class ActivityMain extends Activity {
             mBluetoothAdapter.disable();
             LogUtil.e("BT disable !!!!");
         }
+    }
+
+    public void onClickRuleConfig(View v) {
+        Intent intent = new Intent(this, ActivityRuleConfig.class);
+        startActivity(intent);
     }
     
     public void onClickServerConfig(View v) {
@@ -317,6 +342,23 @@ public class ActivityMain extends Activity {
             EntryAdapter adapter = (EntryAdapter)mListView.getAdapter();
             if (adapter != null)
                 adapter.notifyDataSetChanged();
+        }
+    }
+    
+    static class ServiceHandler extends Handler {
+        private WeakReference<ActivityMain>    mParent;
+        
+        ServiceHandler(ActivityMain parent) {
+            mParent = new WeakReference<ActivityMain>(parent);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final ActivityMain parent = mParent.get();
+            
+            switch (msg.what) {
+            
+            }
         }
     }
 }

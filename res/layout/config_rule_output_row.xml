@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tableRuleOutput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:stretchColumns="*" >
+
+        <TableRow
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:stretchColumns="*">
+           
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="35dp"
+                android:layout_margin="1dp"
+                android:gravity="center"
+                android:text="@string/config_rule_output" />
+    
+            <Spinner
+                android:id="@+id/spinnerGpioOutput"
+                style="android:spinnerStyle"
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:layout_weight="3"
+                android:drawSelectorOnTop="true"
+                android:gravity="center" />
+    
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="35dp"
+                android:layout_margin="1dp"
+                android:gravity="center"
+                android:text="@string/config_rule_operation"/>
+    
+            <Spinner
+                android:id="@+id/spinnerGpioAction"
+                style="android:spinnerStyle"
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:layout_weight="3"
+                android:drawSelectorOnTop="true"
+                android:entries="@array/config_rule_action"
+                android:gravity="center" />
+        </TableRow>
+        
+    </TableLayout>

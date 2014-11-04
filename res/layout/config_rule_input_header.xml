@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <TableLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tableRuleInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="#FFFFFFFF">
+
+        <TableRow 
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_marginLeft="3dp"
+           android:layout_marginRight="3dp">
+           
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="3"
+                android:layout_height="35dp"
+                android:background="#EEEEEE"
+                android:layout_marginRight="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:gravity="center"
+                android:text="@string/config_rule_input" />
+    
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="4"
+                android:layout_height="35dp"
+                android:background="#EEEEEE"
+                android:layout_margin="1dp"
+                android:gravity="center"
+                android:text="@string/config_rule_condition" />
+            
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="35dp"
+                android:background="#EEEEEE"
+                android:layout_margin="1dp"
+                android:gravity="center"
+                android:text="@string/config_rule_operator"/>
+    
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="35dp"
+                android:minWidth="35dp"
+                android:layout_marginTop="1dp"
+                android:background="#EEEEEE" />
+    
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="35dp"
+                android:minWidth="35dp"
+                android:layout_marginTop="1dp"
+                android:background="#EEEEEE" />
+        </TableRow>
+
+        <include
+            layout="@layout/config_rule_input_row" />
+        <include
+            layout="@layout/config_rule_input_row" />
+    </TableLayout>

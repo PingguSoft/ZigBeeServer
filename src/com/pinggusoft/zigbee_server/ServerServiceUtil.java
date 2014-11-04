@@ -48,7 +48,7 @@ public class ServerServiceUtil {
         }
     };
     
-    private void bind() {
+    public void bind() {
         mCtx.bindService(new Intent(mCtx, ServerService.class), mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
         LogUtil.i("Binding !!!");
@@ -103,6 +103,10 @@ public class ServerServiceUtil {
      * Server Service Utils 
      ******************************************************************************************************************
      */
+    public void stop() {
+        sendMessageToService(ServerService.CMD_STOP_SERVICE, 0, 0, null);
+    }
+    
     public void asyncChangeBTAddr(String addr) {
         sendMessageToService(ServerService.CMD_BT_DEVICE_CHANGED, 0, 0, addr);
     }

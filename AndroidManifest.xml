@@ -54,8 +54,12 @@
         <activity android:name=".ActivityClient"
                   android:label="@string/main_client">
         </activity>
+        
+        <activity android:name=".ActivityRuleConfig"
+                  android:label="@string/main_rule_config">
+        </activity>
       
-        <service android:name=".ServerService" android:enabled="true"/>
+        <service android:name=".ServerService"/>
         
         <meta-data android:name="com.google.android.maps.v2.API_KEY" android:value="AIzaSyAr1SFPHWitLr1Qi-67MnZJ3jjIru4X5Q0"/>
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
