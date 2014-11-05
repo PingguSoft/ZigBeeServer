@@ -76,6 +76,7 @@ public class HTTPServer extends Thread {
         mLockACK  = new ReentrantLock();
         mLockCond = mLockACK.newCondition();
         
+        LogUtil.d("WEBSERVER IS CREATED !!");
         mService = new ServerServiceUtil(context, new Messenger(new ServiceHandler(this)));
         registry = new HttpRequestHandlerRegistry();
         registry.register(ALL_PATTERN, new HomePageHandler(context));
@@ -122,12 +123,17 @@ public class HTTPServer extends Thread {
     }
     
     public synchronized void startThread() {
+        if (isRunning)
+            return;
+        
         isRunning = true;
         super.start();
     }
     
     public synchronized void stopThread(){
-        isRunning = false;
+        if (!isRunning)
+            return;
+        
         if (serverSocket != null && !serverSocket.isClosed()) {
             try {
                 LogUtil.d("SERVER SOCKET CLOSE !!");
@@ -136,6 +142,10 @@ public class HTTPServer extends Thread {
                 e.printStackTrace();
             }
         }
+        if (mService != null)
+            mService.unbind();
+        
+        isRunning = false;
     }
 
     public void setNotifyManager(NotificationManager notifyManager) {

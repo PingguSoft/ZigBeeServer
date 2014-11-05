@@ -103,8 +103,12 @@ public class ServerServiceUtil {
      * Server Service Utils 
      ******************************************************************************************************************
      */
-    public void stop() {
-        sendMessageToService(ServerService.CMD_STOP_SERVICE, 0, 0, null);
+    public void startHTTP() {
+        sendMessageToService(ServerService.CMD_START_HTTP_SERVER, 0, 0, null);
+    }
+    
+    public void stopHTTP() {
+        sendMessageToService(ServerService.CMD_STOP_HTTP_SERVER, 0, 0, null);
     }
     
     public void asyncChangeBTAddr(String addr) {

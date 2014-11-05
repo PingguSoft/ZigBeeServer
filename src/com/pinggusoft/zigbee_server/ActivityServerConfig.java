@@ -44,7 +44,16 @@ public class ActivityServerConfig extends Activity {
         mCommon  = new CommonUtils(this);
         mCommon.createGpioTable();
         findViewById(R.id.buttonReadNode).setEnabled(false);
-        findViewById(R.id.buttonWriteNode).setEnabled(false);
+
+        
+        //findViewById(R.id.buttonWriteNode).setEnabled(false);
+        mNode = mApp.getLocalNode();
+        for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
+            mCommon.getSpinnerUsages()[i].setSelection(mNode.getGpioUsage(i));
+            mCommon.getEditGpioNames()[i].setText(mNode.getGpioName(i));
+        }
+        
+        
         
         new Handler().postDelayed(new Runnable() {
                 @Override

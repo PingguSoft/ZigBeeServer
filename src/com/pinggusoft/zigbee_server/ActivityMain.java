@@ -56,8 +56,7 @@ public class ActivityMain extends Activity {
     private static boolean      mBluetoothEnabled = false;
     private ArrayList<Item>     items = new ArrayList<Item>();
     private ListView            mListView = null;
-    private boolean             mStart = false;
-    //private ServerServiceUtil   mService = null;
+    private ServerServiceUtil   mService = null;
    
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,10 +66,7 @@ public class ActivityMain extends Activity {
 
         app.load();
         
-//        Intent intent = new Intent(ActivityMain.this, ServerService.class);
-//        startService(intent);
-//        mStart = true;
-        //mService = new ServerServiceUtil(getApplicationContext(), new Messenger(new ServiceHandler(this)));
+        mService = new ServerServiceUtil(getApplicationContext(), new Messenger(new ServiceHandler(this)));
         
         mListView = (ListView)findViewById(R.id.listView);
         
@@ -109,9 +105,7 @@ public class ActivityMain extends Activity {
                     if (item.getMode() == Item.MODE_ITEM_SEL) {
                         it = (EntrySelItem)item;
                     }
-                    
-                    Intent intent = new Intent(ActivityMain.this, ServerService.class);
-                    
+
                     switch (item.id) {
                     case ID_SERVER_SETTING:
                         onClickServerConfig(null);
@@ -130,26 +124,13 @@ public class ActivityMain extends Activity {
                         break;
                         
                     case ID_QUIT:
-                        if (mStart) {
-//                            mService.unbind();
-                            stopService(intent);
-                        }
-                        
+                        mService.stopHTTP();
+                        mService.unbind();
                         onClickQuit(null);
                         break;
                         
                         
                     case ID_TEST:
-                        LogUtil.e("Service Running :" + mStart);
-                        if (mStart) {
-//                            mService.unbind();
-//                            
-                            stopService(intent);
-                        } else {
-//                            mService.bind();
-                            startService(intent);
-                        }
-                        mStart = !mStart;
                         break;
                     }
                 }

@@ -12,11 +12,6 @@
         android:focusable="true"
         android:focusableInTouchMode="true">
 
-        <include
-            layout="@layout/config_rule_output_row" />
-
-        <include
-            layout="@layout/config_rule_input_header" />
        
     </LinearLayout>
 </ScrollView>

@@ -57,6 +57,7 @@
     <string name="config_rule_input">입  력</string>
     <string name="config_rule_condition">조  건</string>
     <string name="config_rule_operator">연산</string>
+    <string name="config_rule_input_time">시간</string>
     
     
     <!-- Bluetooth Config -->

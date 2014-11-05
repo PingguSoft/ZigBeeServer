@@ -34,18 +34,19 @@ public class ServerService extends Service {
     private static final int    NOTIFICATION_STARTED_ID = 1;
     
     public static final int     RPT_DIO_CHANGED         = ProbeeZ20S.CB_REPORT;
-    public static final int     CMD_STOP_SERVICE        = ProbeeZ20S.CB_END + 0;
-    public static final int     CMD_BT_DEVICE_CHANGED   = ProbeeZ20S.CB_END + 1;
-    public static final int     CMD_SERVER_PORT_CHANGED = ProbeeZ20S.CB_END + 2;
-    public static final int     CMD_REGISTER_CLIENT     = ProbeeZ20S.CB_END + 3;
-    public static final int     CMD_UNREGISTER_CLIENT   = ProbeeZ20S.CB_END + 4;
-    public static final int     CMD_READ_INFO           = ProbeeZ20S.CB_END + 5;
-    public static final int     CMD_WRITE_INFO          = ProbeeZ20S.CB_END + 6;
-    public static final int     CMD_READ_GPIO           = ProbeeZ20S.CB_END + 7;
-    public static final int     CMD_WRITE_GPIO          = ProbeeZ20S.CB_END + 8;
-    public static final int     CMD_READ_ANALOG         = ProbeeZ20S.CB_END + 9;
-    public static final int     CMD_SCAN                = ProbeeZ20S.CB_END + 10;
-    public static final int     CMD_GET_SERVER_ADDR     = ProbeeZ20S.CB_END + 11;
+    public static final int     CMD_START_HTTP_SERVER   = ProbeeZ20S.CB_END + 0;
+    public static final int     CMD_STOP_HTTP_SERVER    = ProbeeZ20S.CB_END + 1;
+    public static final int     CMD_BT_DEVICE_CHANGED   = ProbeeZ20S.CB_END + 2;
+    public static final int     CMD_SERVER_PORT_CHANGED = ProbeeZ20S.CB_END + 3;
+    public static final int     CMD_REGISTER_CLIENT     = ProbeeZ20S.CB_END + 4;
+    public static final int     CMD_UNREGISTER_CLIENT   = ProbeeZ20S.CB_END + 5;
+    public static final int     CMD_READ_INFO           = ProbeeZ20S.CB_END + 6;
+    public static final int     CMD_WRITE_INFO          = ProbeeZ20S.CB_END + 7;
+    public static final int     CMD_READ_GPIO           = ProbeeZ20S.CB_END + 8;
+    public static final int     CMD_WRITE_GPIO          = ProbeeZ20S.CB_END + 9;
+    public static final int     CMD_READ_ANALOG         = ProbeeZ20S.CB_END + 10;
+    public static final int     CMD_SCAN                = ProbeeZ20S.CB_END + 11;
+    public static final int     CMD_GET_SERVER_ADDR     = ProbeeZ20S.CB_END + 12;
     
     private ArrayList<Messenger>    mClients   = new ArrayList<Messenger>();
     private final Messenger         mMessenger = new Messenger(new IncomingHandler());
@@ -124,7 +125,14 @@ public class ServerService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        LogUtil.d("onBind : %d", mClients.size());
         return mMessenger.getBinder();
+    }
+    
+    @Override
+    public boolean onUnbind(Intent intent) {
+        LogUtil.d("onUnbind : %d", mClients.size());
+        return true;
     }
     
     
@@ -138,21 +146,26 @@ public class ServerService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             
-            case CMD_STOP_SERVICE:
+            case CMD_START_HTTP_SERVER:
+                if (mHTTPServer != null)
+                    mHTTPServer.startThread();
+                LogUtil.d("CMD_START_HTTP_SERVER !!");
+                break;
+            
+            case CMD_STOP_HTTP_SERVER:
                 if (mHTTPServer != null)
                     mHTTPServer.stopThread();
-
-                stopForeground(true);
-                stopSelf();
-                LogUtil.d("DISABLE SERVICE !!");
+                LogUtil.d("CMD_STOP_HTTP_SERVER !!");
                 break;
                 
             case CMD_REGISTER_CLIENT:
                 mClients.add(msg.replyTo);
+                LogUtil.d("Register : %d", mClients.size());
                 break;
                 
             case CMD_UNREGISTER_CLIENT:
                 mClients.remove(msg.replyTo);
+                LogUtil.d("Unregister : %d", mClients.size());
                 break;
                 
             case CMD_BT_DEVICE_CHANGED:
