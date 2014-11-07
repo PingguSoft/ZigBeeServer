@@ -42,14 +42,15 @@
                 android:text="@string/config_rule_operator"/>
     
             <Button
+                android:id="@+id/buttonPlus"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginTop="1dp"
-                android:background="#00777777"
                 android:minHeight="35dp"
-                android:minWidth="35dp" />
+                android:minWidth="35dp"
+                android:text="+" />
     
             <Button
                 style="?android:attr/buttonStyleSmall"
@@ -60,10 +61,6 @@
                 android:background="#00777777"
                 android:minHeight="35dp"
                 android:minWidth="35dp" />
-
         </TableRow>
-
-        <include
-            layout="@layout/config_rule_input_row" />
 
     </TableLayout>

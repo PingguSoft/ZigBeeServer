@@ -41,7 +41,6 @@
             android:layout_weight="3.5"
             android:layout_height="40dp"
             android:minHeight="35dp"
-            android:layout_margin="1dp"
             android:text="Range"
             android:visibility="gone" />
         
@@ -61,15 +60,14 @@
             android:gravity="center"/>
 
         <Button
-            android:id="@+id/buttonPlus"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:background="#00777777"
             android:layout_margin="1dp"
             android:minHeight="35dp"
-            android:minWidth="35dp"
-            android:text="+" />
+            android:minWidth="35dp"/>
 
         <Button
             android:id="@+id/buttonMinus"

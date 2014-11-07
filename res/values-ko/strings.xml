@@ -58,6 +58,19 @@
     <string name="config_rule_condition">조  건</string>
     <string name="config_rule_operator">연산</string>
     <string name="config_rule_input_time">시간</string>
+    <string name="config_rule_time">시간 설정</string>
+    <string name="config_rule_time_start">시작 시간</string>
+    <string name="config_rule_time_end">종료 시간</string>
+    <string name="config_rule_time_days">요 일</string>
+    <string name="config_rule_time_day_sun">일</string>
+    <string name="config_rule_time_day_mon">월</string>
+    <string name="config_rule_time_day_tue">화</string>
+    <string name="config_rule_time_day_wed">수</string>
+    <string name="config_rule_time_day_thu">목</string>
+    <string name="config_rule_time_day_fri">금</string>
+    <string name="config_rule_time_day_sat">토</string>
+    <string name="config_rule_done">완 료</string>
+    <string name="config_rule_cancel">취 소</string>
     
     
     <!-- Bluetooth Config -->
