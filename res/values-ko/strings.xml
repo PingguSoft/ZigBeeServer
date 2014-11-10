@@ -69,6 +69,9 @@
     <string name="config_rule_time_day_thu">목</string>
     <string name="config_rule_time_day_fri">금</string>
     <string name="config_rule_time_day_sat">토</string>
+    <string name="config_rule_thermo">시간 설정</string>
+    <string name="config_rule_thermo_min">최소 온도</string>
+    <string name="config_rule_thermo_max">최대 온도</string>    
     <string name="config_rule_done">완 료</string>
     <string name="config_rule_cancel">취 소</string>
     

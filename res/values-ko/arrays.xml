@@ -28,8 +28,8 @@
     </string-array>
     
     <string-array name="config_rule_action">
-        <item>LOW</item>
-        <item>HIGH</item>
+        <item>끔</item>
+        <item>켬</item>
         <item>전환</item>
     </string-array>
     
