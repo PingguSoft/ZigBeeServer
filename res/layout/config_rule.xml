@@ -5,13 +5,43 @@
     android:orientation="vertical" >
     
     <LinearLayout 
-        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
         android:orientation="vertical"
         android:focusable="true"
         android:focusableInTouchMode="true">
 
-       
+        <RelativeLayout 
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/textPort"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_marginLeft="10dp"
+                android:gravity="center"
+                android:text="@string/config_rule_output" />
+
+            <Spinner
+                android:id="@+id/spinnerGpioOutput"
+                style="android:spinnerStyle"
+                android:layout_width="100dp"
+                android:layout_height="35dp"
+                android:layout_marginLeft="20dp"
+                android:layout_alignParentTop="true"
+                android:layout_toRightOf="@id/textPort"
+                android:drawSelectorOnTop="true"
+                android:gravity="center" />
+        </RelativeLayout>            
+            
+        <LinearLayout 
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
     </LinearLayout>
+    
 </ScrollView>

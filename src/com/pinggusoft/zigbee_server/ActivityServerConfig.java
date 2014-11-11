@@ -47,7 +47,7 @@ public class ActivityServerConfig extends Activity {
 
         
         //findViewById(R.id.buttonWriteNode).setEnabled(false);
-        mNode = mApp.getLocalNode();
+        mNode = mApp.getNode(0);
         if (mNode != null) {
             for (int i = 0; i < ZigBeeNode.GPIO_CNT; i++) {
                 mCommon.getSpinnerUsages()[i].setSelection(mNode.getGpioUsage(i));

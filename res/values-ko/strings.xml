@@ -74,7 +74,10 @@
     <string name="config_rule_thermo_max">최대 온도</string>    
     <string name="config_rule_done">완 료</string>
     <string name="config_rule_cancel">취 소</string>
-    
+    <string name="config_rule_action_off">끔</string>
+    <string name="config_rule_action_on">켬</string>
+    <string name="config_rule_action_toggle">전환</string>
+   
     
     <!-- Bluetooth Config -->
     <string name="bt_config_paired_devices">Paring된 장치</string>
