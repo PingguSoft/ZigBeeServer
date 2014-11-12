@@ -145,8 +145,8 @@ public class RPCHandler implements HttpRequestHandler {
                 Map<String, Object> params = req.getNamedParams();
                 
                 id   = ((Long)params.get("id")).intValue();
-                gpio = (int)id & 0xffff;
-                idx  = (int)id >> 16;
+                gpio = ZigBeeNode.getGpioFromID(id);
+                idx  = ZigBeeNode.getNIDFromID(id);
                 node = ((ServerApp)context).getNode((int)idx);
                 mService.asyncReadGpio(id, node);
                 
@@ -168,8 +168,8 @@ public class RPCHandler implements HttpRequestHandler {
                 Map<String, Object> params = req.getNamedParams();
                 
                 id   = ((Long)params.get("id")).intValue();
-                gpio = (int)id & 0xffff;
-                idx  = (int)id >> 16;
+                gpio = ZigBeeNode.getGpioFromID(id);
+                idx  = ZigBeeNode.getNIDFromID(id);
                 node = ((ServerApp)context).getNode((int)idx);
                 mService.asyncReadAnalog((int)id, node);
                 
@@ -211,8 +211,8 @@ public class RPCHandler implements HttpRequestHandler {
 
                 id    = ((Long)params.get("id")).intValue();
                 value = ((Long)params.get("value")).intValue();
-                gpio  = (int)id & 0xffff;
-                idx   = (int)id >> 16;
+                gpio = ZigBeeNode.getGpioFromID(id);
+                idx  = ZigBeeNode.getNIDFromID(id);
                 node  = ((ServerApp)context).getNode((int)idx);
                 mService.asyncWriteGpio((int)id, (int)value, node);
                 

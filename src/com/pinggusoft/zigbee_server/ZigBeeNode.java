@@ -391,4 +391,16 @@ public class ZigBeeNode {
         }
         return 1;
     }
+    
+    public static int getNIDFromID(int id) {
+        return (int)id >> 16;
+    }
+    
+    public static int getGpioFromID(int id) {
+        return (int)((id >> 8) & 0xff);
+    }
+    
+    public static int buildID(int nid, int gpio) {
+        return (int)((nid << 16) | (gpio << 8));
+    }
 }

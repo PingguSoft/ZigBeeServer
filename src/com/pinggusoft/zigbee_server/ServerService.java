@@ -34,19 +34,20 @@ public class ServerService extends Service {
     private static final int    NOTIFICATION_STARTED_ID = 1;
     
     public static final int     RPT_DIO_CHANGED         = ProbeeZ20S.CB_REPORT;
-    public static final int     CMD_START_HTTP_SERVER   = ProbeeZ20S.CB_END + 0;
-    public static final int     CMD_STOP_HTTP_SERVER    = ProbeeZ20S.CB_END + 1;
-    public static final int     CMD_BT_DEVICE_CHANGED   = ProbeeZ20S.CB_END + 2;
-    public static final int     CMD_SERVER_PORT_CHANGED = ProbeeZ20S.CB_END + 3;
-    public static final int     CMD_REGISTER_CLIENT     = ProbeeZ20S.CB_END + 4;
-    public static final int     CMD_UNREGISTER_CLIENT   = ProbeeZ20S.CB_END + 5;
-    public static final int     CMD_READ_INFO           = ProbeeZ20S.CB_END + 6;
-    public static final int     CMD_WRITE_INFO          = ProbeeZ20S.CB_END + 7;
-    public static final int     CMD_READ_GPIO           = ProbeeZ20S.CB_END + 8;
-    public static final int     CMD_WRITE_GPIO          = ProbeeZ20S.CB_END + 9;
-    public static final int     CMD_READ_ANALOG         = ProbeeZ20S.CB_END + 10;
-    public static final int     CMD_SCAN                = ProbeeZ20S.CB_END + 11;
-    public static final int     CMD_GET_SERVER_ADDR     = ProbeeZ20S.CB_END + 12;
+    public static final int     CMD_EVALUATE            = ProbeeZ20S.CB_END + 0;
+    public static final int     CMD_START_HTTP_SERVER   = ProbeeZ20S.CB_END + 10;
+    public static final int     CMD_STOP_HTTP_SERVER    = ProbeeZ20S.CB_END + 11;
+    public static final int     CMD_BT_DEVICE_CHANGED   = ProbeeZ20S.CB_END + 12;
+    public static final int     CMD_SERVER_PORT_CHANGED = ProbeeZ20S.CB_END + 13;
+    public static final int     CMD_REGISTER_CLIENT     = ProbeeZ20S.CB_END + 14;
+    public static final int     CMD_UNREGISTER_CLIENT   = ProbeeZ20S.CB_END + 15;
+    public static final int     CMD_READ_INFO           = ProbeeZ20S.CB_END + 16;
+    public static final int     CMD_WRITE_INFO          = ProbeeZ20S.CB_END + 17;
+    public static final int     CMD_READ_GPIO           = ProbeeZ20S.CB_END + 18;
+    public static final int     CMD_WRITE_GPIO          = ProbeeZ20S.CB_END + 19;
+    public static final int     CMD_READ_ANALOG         = ProbeeZ20S.CB_END + 20;
+    public static final int     CMD_SCAN                = ProbeeZ20S.CB_END + 21;
+    public static final int     CMD_GET_SERVER_ADDR     = ProbeeZ20S.CB_END + 22;
     
     private ArrayList<Messenger>    mClients   = new ArrayList<Messenger>();
     private final Messenger         mMessenger = new Messenger(new IncomingHandler());
@@ -399,7 +400,7 @@ public class ServerService extends Service {
             return;
 
         String  strCmd = null;
-        int     gpio = (int)(id & 0xffff);
+        int     gpio = ZigBeeNode.getGpioFromID(id);
         
         if (gpio > node.getMaxGPIO())
             strCmd = ProbeeZ20S.CMD_GET_GPIOS_VALUE;
@@ -424,7 +425,7 @@ public class ServerService extends Service {
             return;
 
         String  strCmd = null;
-        int     gpio = (int)(id & 0xffff);
+        int     gpio = ZigBeeNode.getGpioFromID(id);
         
         if (gpio > node.getMaxGPIO())
             strCmd = String.format(ProbeeZ20S.CMD_SET_GPIOS_VALUE, node.getGpioValue());
@@ -445,7 +446,7 @@ public class ServerService extends Service {
             return;
 
         String  strCmd = ProbeeZ20S.CMD_GET_AIS_VALUE;
-        int     gpio = (int)(id & 0xffff);
+        int     gpio = ZigBeeNode.getGpioFromID(id);
 
         if (node.isRemote())
             strCmd = new String(String.format(ProbeeZ20S.CMD_REMOTE, node.getAddr(), strCmd));
@@ -514,7 +515,7 @@ public class ServerService extends Service {
                 node.setGpioAnalog(strAnalog);
              // ++000195000000735A|100101000*0000001|1826,****,****,****,****,****
              //
-            } else {
+            } else if (msg.what >= CMD_START_HTTP_SERVER) {
                 parent.sendMessageToClient(msg);
             }
         }
