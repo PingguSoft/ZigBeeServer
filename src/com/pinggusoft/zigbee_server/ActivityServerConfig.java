@@ -59,6 +59,7 @@ public class ActivityServerConfig extends Activity {
         new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    mService.stopRuleChecking();
                     onClickReadNode(findViewById(R.id.buttonReadNode));
                 }
             }, 500);
@@ -101,6 +102,7 @@ public class ActivityServerConfig extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mService.startRuleChecking();
         mService.unbind();
         mApp.save();
     }

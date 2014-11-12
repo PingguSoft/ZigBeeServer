@@ -60,12 +60,10 @@ public class ActivityRuleConfig extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.config_rule);
         
-        mApp        = (ServerApp)getApplication();
-        mApp.load();
+        mApp = (ServerApp)getApplication();
         RuleManager.load(this);
         createScreen();
     }
-    
 
     @Override
     public void onStart() {

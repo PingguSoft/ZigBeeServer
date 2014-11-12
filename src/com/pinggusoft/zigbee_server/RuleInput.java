@@ -176,6 +176,7 @@ public class RuleInput {
 
         if (usage == ZigBeeNode.TYPE_INPUT_TOUCH || usage == ZigBeeNode.TYPE_INPUT_SWITCH) { 
             ZigBeeNode node  = app.getNode(getNodeID());
+            LogUtil.d("node:%d. gpio:%d, val:%d, cond:%d", getNodeID(), getGpio(), node.getGpioValue(getGpio()), getMax());
             if (node.getGpioValue(getGpio()) == getMax())
                 ret = true;
         } else if (usage == ZigBeeNode.TYPE_INPUT_ANALOG) {
@@ -196,7 +197,7 @@ public class RuleInput {
                 
                 Calendar  calST = Calendar.getInstance();
                 calST.set(0, 0, 1, getStartHour(), getStartMin());
-                //LogUtil.d("ST:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calST)));
+                LogUtil.d("ST:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calST)));
                 
                 Calendar  calED = Calendar.getInstance();
                 calED.set(0, 0, 1, getEndHour(), getEndMin());
@@ -205,9 +206,10 @@ public class RuleInput {
                     if (h < 12)
                         calCur.set(Calendar.DAY_OF_MONTH, 2);
                 }
-                //LogUtil.d("ED:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calED)));
-                //LogUtil.d("CUR:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calCur)));
-                if (calCur.after(calST) && calCur.before(calED))
+                LogUtil.d("ED:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calED)));
+                LogUtil.d("CUR:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calCur)));
+                if (calCur.compareTo(calST) >= 0 && calCur.compareTo(calED) < 0)
+                //if (calCur.after(calST) && calCur.before(calED))
                     ret = true;
             }
         }

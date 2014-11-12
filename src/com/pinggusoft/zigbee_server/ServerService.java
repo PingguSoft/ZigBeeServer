@@ -2,17 +2,20 @@ package com.pinggusoft.zigbee_server;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.pinggusoft.httpserver.HTTPServer;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,10 +36,11 @@ public class ServerService extends Service {
     
     private static final int    NOTIFICATION_STARTED_ID = 1;
     
+    public static final int     RPT_BT_CON              = ProbeeZ20S.CB_BT_CON;
     public static final int     RPT_DIO_CHANGED         = ProbeeZ20S.CB_REPORT;
     public static final int     CMD_EVALUATE            = ProbeeZ20S.CB_END + 0;
-    public static final int     CMD_START_HTTP_SERVER   = ProbeeZ20S.CB_END + 10;
-    public static final int     CMD_STOP_HTTP_SERVER    = ProbeeZ20S.CB_END + 11;
+    public static final int     CMD_HTTP_SERVER_ENABLE  = ProbeeZ20S.CB_END + 10;
+    public static final int     CMD_RULE_CHECK_ENABLE   = ProbeeZ20S.CB_END + 11;
     public static final int     CMD_BT_DEVICE_CHANGED   = ProbeeZ20S.CB_END + 12;
     public static final int     CMD_SERVER_PORT_CHANGED = ProbeeZ20S.CB_END + 13;
     public static final int     CMD_REGISTER_CLIENT     = ProbeeZ20S.CB_END + 14;
@@ -48,6 +52,7 @@ public class ServerService extends Service {
     public static final int     CMD_READ_ANALOG         = ProbeeZ20S.CB_END + 20;
     public static final int     CMD_SCAN                = ProbeeZ20S.CB_END + 21;
     public static final int     CMD_GET_SERVER_ADDR     = ProbeeZ20S.CB_END + 22;
+
     
     private ArrayList<Messenger>    mClients   = new ArrayList<Messenger>();
     private final Messenger         mMessenger = new Messenger(new IncomingHandler());
@@ -55,6 +60,7 @@ public class ServerService extends Service {
     private ProbeeZ20S              mProbee = null;
     private HTTPServer              mHTTPServer = null;
     private NotificationManager     mNotifyManager = null;
+    private ProbeeHandler           mProbeeHandler = null;
 
     /*
      ******************************************************************************************************************
@@ -71,7 +77,8 @@ public class ServerService extends Service {
         mMessageManager = new MessageManager();
         new Thread(mMessageManager).start();
 
-        mProbee = new ProbeeZ20S(getApplicationContext(), new ProbeeHandler(this));
+        mProbeeHandler = new ProbeeHandler(this);
+        mProbee = new ProbeeZ20S(getApplicationContext(), mProbeeHandler);
         String strAddr = ((ServerApp)getApplication()).getBTAddr(); 
         if (strAddr != null) {
             BluetoothDevice device =  BluetoothAdapter.getDefaultAdapter().getRemoteDevice(strAddr);
@@ -81,6 +88,8 @@ public class ServerService extends Service {
         mHTTPServer.startThread();
         
         showNotification();
+        RuleManager.load(this);
+        setAlarm(true);
     }
 
     private void showNotification() {
@@ -100,11 +109,34 @@ public class ServerService extends Service {
         //startForeground(1, notification);
     }
     
+    private final static String ACTION_CHECK_RULE = "action_check_rule";
+    
+    private void setAlarm(boolean start) {
+        Intent intent = new Intent(this, ServerService.class);
+        intent.setAction(ACTION_CHECK_RULE);
+        PendingIntent pi = PendingIntent.getService(this, 0, intent, 0);
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        
+        alarmManager.cancel(pi);
+        if (start) {
+            Calendar calCur = Calendar.getInstance();
+            calCur.setTimeInMillis(System.currentTimeMillis());
+            int sec = calCur.get(Calendar.SECOND);
+            calCur.add(Calendar.SECOND, 60 - sec);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calCur.getTimeInMillis(), 60 * 1000, pi);
+        }
+    }
+    
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         LogUtil.d("onStartCommand !!");
-        showNotification();
-        
+        //showNotification();
+        if (intent != null) {
+            String strAction = intent.getAction();
+            if (strAction != null && strAction.equals(ACTION_CHECK_RULE))
+                RuleManager.evaluate(getApplicationContext(), mProbeeHandler);
+        }
+
         return START_STICKY;
     }
     
@@ -147,18 +179,17 @@ public class ServerService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             
-            case CMD_START_HTTP_SERVER:
-                if (mHTTPServer != null)
-                    mHTTPServer.startThread();
-                LogUtil.d("CMD_START_HTTP_SERVER !!");
+            case CMD_HTTP_SERVER_ENABLE:
+                if (mHTTPServer != null) {
+                    if (msg.arg1 == 1)
+                        mHTTPServer.startThread();
+                    else
+                        mHTTPServer.stopThread();
+                }
+                setAlarm((msg.arg1 == 1) ? true : false);
+                LogUtil.d("CMD_HTTP_SERVER_ENABLE!! : %d", msg.arg1);
                 break;
             
-            case CMD_STOP_HTTP_SERVER:
-                if (mHTTPServer != null)
-                    mHTTPServer.stopThread();
-                LogUtil.d("CMD_STOP_HTTP_SERVER !!");
-                break;
-                
             case CMD_REGISTER_CLIENT:
                 mClients.add(msg.replyTo);
                 LogUtil.d("Register : %d", mClients.size());
@@ -191,6 +222,10 @@ public class ServerService extends Service {
                     mHTTPServer = new HTTPServer(getApplicationContext(), mNotifyManager);
                     mHTTPServer.startThread();
                 }
+                break;
+                
+            case CMD_RULE_CHECK_ENABLE:
+                setAlarm((msg.arg1 == 1) ? true : false);
                 break;
 
             default:
@@ -319,12 +354,12 @@ public class ServerService extends Service {
         str = mProbee.writeATCmd(ProbeeZ20S.CMD_AT, 500);
 
         str = mProbee.writeATCmd(ProbeeZ20S.CMD_GET_ECHO_MODE, 0, 1, 500);
-        if (!str.startsWith("0")) {
+        if (str != null && !str.startsWith("0")) {
             str = mProbee.writeATCmd(String.format(ProbeeZ20S.CMD_SET_ECHO_MODE, "0"), 500);
             str = mProbee.writeATCmd(ProbeeZ20S.CMD_RESET, 500);
         }
 
-        str = mProbee.writeATCmd(String.format(ProbeeZ20S.CMD_SET_JOIN_TIME, 10), 500);
+        str = mProbee.writeATCmd(String.format(ProbeeZ20S.CMD_SET_JOIN_TIME, 255), 500);
         str = mProbee.writeATCmd(ProbeeZ20S.CMD_SCAN, 5000);
         sendMessageToClient(CMD_SCAN, id, 0, str);
     }
@@ -499,7 +534,22 @@ public class ServerService extends Service {
         @Override
         public void handleMessage(Message msg) {
             final ServerService parent = mParent.get();
-            if (msg.what == RPT_DIO_CHANGED) {
+            ServerApp app = (ServerApp)parent.getApplicationContext();
+            ZigBeeNode node;
+            
+            switch (msg.what) {
+            case RPT_BT_CON:
+                LogUtil.d("CONNECTED !!!");
+                for (int i = 0; i < app.getNodeCtr(); i++) {
+                    node = app.getNode(i);
+                    int id = ZigBeeNode.buildID(i, 0xff);
+                    Message msgNew = Message.obtain(null, ServerService.CMD_READ_GPIO, id, 0, node);
+                    parent.mMessageManager.offer(msgNew);
+                }
+                parent.sendMessageToClient(msg);
+                break;
+                
+            case RPT_DIO_CHANGED:
                 String strMsg  = (String)msg.obj;
                 
                 int nPos = strMsg.indexOf("|");
@@ -507,16 +557,34 @@ public class ServerService extends Service {
                 String strDIO  = strMsg.substring(nPos + 1, nPos + 1 + ZigBeeNode.GPIO_CNT);
                 nPos = strMsg.lastIndexOf("|");
                 String strAnalog = strMsg.substring(nPos + 1);
-                
                 LogUtil.d("ADDR:%s, DIO:%s, ANALOG:%s", strAddr, strDIO, strAnalog);
-                ServerApp app = (ServerApp)parent.getApplicationContext();
-                ZigBeeNode node = app.getNode(strAddr);
+                
+                node = app.getNode(strAddr);
                 node.setGpioValue(strDIO);
                 node.setGpioAnalog(strAnalog);
              // ++000195000000735A|100101000*0000001|1826,****,****,****,****,****
-             //
-            } else if (msg.what >= CMD_START_HTTP_SERVER) {
+                RuleManager.evaluate(app, this);
+                break;
+            
+            case CMD_EVALUATE:
+                int id  = msg.arg1;
+                int val = msg.arg2;
+
+                node = app.getNode(ZigBeeNode.getNIDFromID(id));
+                int oldVal = node.getGpioValue(ZigBeeNode.getGpioFromID(id));
+                if (val == 2) {
+                    val = (oldVal == 1) ? 0 : 1;
+                }
+                
+                if (val != oldVal) {
+                    Message msgNew = Message.obtain(null, ServerService.CMD_WRITE_GPIO, id, val, node);
+                    parent.mMessageManager.offer(msgNew);
+                }
+                break;
+                
+            default:
                 parent.sendMessageToClient(msg);
+                break;
             }
         }
     }

@@ -68,6 +68,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                mService.stopRuleChecking();
                 mService.asyncGetServerAddr(0);
                 onClickScan(findViewById(R.id.buttonSearch));
             }
@@ -101,6 +102,7 @@ public class ActivityDeviceConfig extends Activity  implements OnItemClickListen
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mService.startRuleChecking();
         mService.unbind();
         mApp.save();
     }

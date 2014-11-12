@@ -104,11 +104,19 @@ public class ServerServiceUtil {
      ******************************************************************************************************************
      */
     public void startHTTP() {
-        sendMessageToService(ServerService.CMD_START_HTTP_SERVER, 0, 0, null);
+        sendMessageToService(ServerService.CMD_HTTP_SERVER_ENABLE, 1, 0, null);
     }
     
     public void stopHTTP() {
-        sendMessageToService(ServerService.CMD_STOP_HTTP_SERVER, 0, 0, null);
+        sendMessageToService(ServerService.CMD_HTTP_SERVER_ENABLE, 0, 0, null);
+    }
+    
+    public void startRuleChecking() {
+        sendMessageToService(ServerService.CMD_RULE_CHECK_ENABLE, 1, 0, null);
+    }
+    
+    public void stopRuleChecking() {
+        sendMessageToService(ServerService.CMD_RULE_CHECK_ENABLE, 0, 0, null);
     }
     
     public void asyncChangeBTAddr(String addr) {

@@ -131,11 +131,10 @@ public class RuleManager {
         for (int i = 0; i < getOutputPortCnt(); i++) {
             RuleOutput output = getAt(i);
             if (output.evaluate(ctx)) {
-                output.getGpio();
-                output.getNodeID();
-                output.getOP();
+                int id  = ZigBeeNode.buildID(output.getNodeID(), output.getGpio());
+                int val = output.getOP();
                 if (handler != null) {
-                    handler.obtainMessage(ServerService.CMD_EVALUATE, 0, 0, null).sendToTarget();
+                    handler.obtainMessage(ServerService.CMD_EVALUATE, id, val, null).sendToTarget();
                 }
             }
         }
