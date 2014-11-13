@@ -88,7 +88,7 @@ public class ServerService extends Service {
         mHTTPServer.startThread();
         
         showNotification();
-        RuleManager.load(this);
+        //RuleManager.load(this);
         setAlarm(true);
     }
 

@@ -87,28 +87,16 @@ public class RuleInput {
         return nMax;
     }
     
-    public int getStartHour() {
+    public int getHour() {
         return nMin >> 8;
     }
     
-    public int getStartMin() {
+    public int getMinute() {
         return nMin & 0xff;
     }
     
-    public int getEndHour() {
-        return nMax >> 8;
-    }
-    
-    public int getEndMin() {
-        return nMax & 0xff;
-    }
-    
-    public void setStartTime(int hour, int min) {
+    public void setTime(int hour, int min) {
         nMin = (hour << 8) | min;
-    }
-    
-    public void setEndTime(int hour, int min) {
-        nMax = (hour << 8) | min;
     }
     
     public void printRule() {
@@ -116,7 +104,7 @@ public class RuleInput {
     }
     
     public String getTimeString() {
-        return String.format("%d:%02d ~ %d:%02d", nMin >> 8, (nMin & 0xff), nMax >> 8, (nMax & 0xff));
+        return String.format("%d:%02d", nMin >> 8, (nMin & 0xff));
     }
     
     public String getThermoString() {
@@ -195,21 +183,11 @@ public class RuleInput {
                 Calendar  calCur = Calendar.getInstance();
                 calCur.set(0, 0, 1, h, m);
                 
-                Calendar  calST = Calendar.getInstance();
-                calST.set(0, 0, 1, getStartHour(), getStartMin());
-                LogUtil.d("ST:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calST)));
-                
-                Calendar  calED = Calendar.getInstance();
-                calED.set(0, 0, 1, getEndHour(), getEndMin());
-                if (getEndHour() < getStartHour()) {
-                    calED.set(Calendar.DAY_OF_MONTH, 2);
-                    if (h < 12)
-                        calCur.set(Calendar.DAY_OF_MONTH, 2);
-                }
-                LogUtil.d("ED:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calED)));
+                Calendar  calSet = Calendar.getInstance();
+                calSet.set(0, 0, 1, getHour(), getMinute());
+                LogUtil.d("SET:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calSet)));
                 LogUtil.d("CUR:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm", calCur)));
-                if (calCur.compareTo(calST) >= 0 && calCur.compareTo(calED) < 0)
-                //if (calCur.after(calST) && calCur.before(calED))
+                if (calCur.compareTo(calSet) == 0)
                     ret = true;
             }
         }

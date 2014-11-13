@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
+import net.minidev.json.JSONArray;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
@@ -25,6 +27,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.pinggusoft.zigbee_server.LogUtil;
+import com.pinggusoft.zigbee_server.RuleManager;
+import com.pinggusoft.zigbee_server.RuleOutput;
 import com.pinggusoft.zigbee_server.ServerApp;
 import com.pinggusoft.zigbee_server.ServerService;
 import com.pinggusoft.zigbee_server.ServerServiceUtil;
@@ -36,7 +40,7 @@ import android.content.Context;
 import android.net.Uri;
 
 public class RPCHandler implements HttpRequestHandler {
-    private Context context = null;
+    private Context mContext = null;
     private Dispatcher mDispatcher;
     private JSONRPC2Response resp = null;
     private ServerServiceUtil mService = null;
@@ -44,7 +48,7 @@ public class RPCHandler implements HttpRequestHandler {
     private Condition       mLockCond = null;
     
     public RPCHandler(Context context, ServerServiceUtil service, Lock lock, Condition cond){
-        this.context = context;
+        this.mContext = context;
         
         mLockACK    = lock;
         mLockCond   = cond;
@@ -55,6 +59,8 @@ public class RPCHandler implements HttpRequestHandler {
         mDispatcher.register(new getNode_Handler());
         mDispatcher.register(new asyncRead_Handler());
         mDispatcher.register(new asyncWrite_Handler());
+        mDispatcher.register(new getRule_Handler());
+        
     }
 
     @Override
@@ -92,14 +98,71 @@ public class RPCHandler implements HttpRequestHandler {
         response.setEntity(entity);
     }
     
+    private byte[] getByteArray(JSONArray array) {
+        byte[] buf = new byte[array.size()];
+        for (int i = 0; i < array.size(); i++) {
+            Long val = (Long)array.get(i);
+            buf[i] = val.byteValue();
+        }
+        
+        return buf;
+    }
     
+    private JSONArray getJSONArray(byte[] byteBuf) {
+        JSONArray array = new JSONArray();
+        for (int i = 0; i < byteBuf.length; i++) {
+            array.add(i, byteBuf[i]);
+        }
+        return array;
+    }
     
     /*
      ******************************************************************************************************************
      * 
      ******************************************************************************************************************
      */    
+    public class getRule_Handler implements RequestHandler {
 
+        public String[] handledRequests() {
+            return new String[]{"getRuleCtr", "getRule", "setRule", "fileRule" };
+        }
+        
+        public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
+            if (req.getMethod().equals("getRuleCtr")) {
+                int val = RuleManager.getOutputPortCnt();
+                return new JSONRPC2Response(val, req.getID());
+            } else if (req.getMethod().equals("getRule")) {
+                Map<String, Object> params = req.getNamedParams();
+                int idx = ((Long)params.get("idx")).intValue();
+
+                RuleOutput output = RuleManager.getAt(idx);
+                Map<String, Object> param = new HashMap<String,Object>();
+                param.put("rule", output.serialize());
+                
+                return new JSONRPC2Response(param, req.getID());
+            }  else if (req.getMethod().equals("setRule")) {
+                Map<String, Object> params = req.getNamedParams();
+                byte[] buf = getByteArray((JSONArray)params.get("rule"));
+
+                RuleOutput output = new RuleOutput();
+                output.deserialize(buf);
+                RuleManager.put(output.getID(), output);
+                return new JSONRPC2Response(output.getID(), req.getID());
+            }  else if (req.getMethod().equals("fileRule")) {
+                Map<String, Object> params = req.getNamedParams();
+                int opt = ((Long)params.get("save")).intValue();
+                if (opt == 1)
+                    RuleManager.save(mContext);
+                else
+                    RuleManager.load(mContext);
+                return new JSONRPC2Response(opt, req.getID());
+            } else {
+                return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
+            }
+        }
+    }
+    
+    
     public class getNode_Handler implements RequestHandler {
 
         public String[] handledRequests() {
@@ -108,7 +171,7 @@ public class RPCHandler implements HttpRequestHandler {
         
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
             if (req.getMethod().equals("getNodeCtr")) {
-                ServerApp app = (ServerApp)context;
+                ServerApp app = (ServerApp)mContext;
                 int val       = app.getNodeCtr();
 
                 return new JSONRPC2Response(val, req.getID());
@@ -116,7 +179,7 @@ public class RPCHandler implements HttpRequestHandler {
                 Map<String, Object> params = req.getNamedParams();
                 int idx = ((Long)params.get("idx")).intValue();
                 
-                ServerApp app = (ServerApp)context;
+                ServerApp app = (ServerApp)mContext;
                 ZigBeeNode node = app.getNode(idx);
                 
                 Map<String, Object> param = new HashMap<String,Object>();
@@ -147,7 +210,7 @@ public class RPCHandler implements HttpRequestHandler {
                 id   = ((Long)params.get("id")).intValue();
                 gpio = ZigBeeNode.getGpioFromID(id);
                 idx  = ZigBeeNode.getNIDFromID(id);
-                node = ((ServerApp)context).getNode((int)idx);
+                node = ((ServerApp)mContext).getNode((int)idx);
                 mService.asyncReadGpio(id, node);
                 
                 mLockACK.lock();
@@ -170,7 +233,7 @@ public class RPCHandler implements HttpRequestHandler {
                 id   = ((Long)params.get("id")).intValue();
                 gpio = ZigBeeNode.getGpioFromID(id);
                 idx  = ZigBeeNode.getNIDFromID(id);
-                node = ((ServerApp)context).getNode((int)idx);
+                node = ((ServerApp)mContext).getNode((int)idx);
                 mService.asyncReadAnalog((int)id, node);
                 
                 mLockACK.lock();
@@ -213,7 +276,7 @@ public class RPCHandler implements HttpRequestHandler {
                 value = ((Long)params.get("value")).intValue();
                 gpio = ZigBeeNode.getGpioFromID(id);
                 idx  = ZigBeeNode.getNIDFromID(id);
-                node  = ((ServerApp)context).getNode((int)idx);
+                node  = ((ServerApp)mContext).getNode((int)idx);
                 mService.asyncWriteGpio((int)id, (int)value, node);
                 
                 mLockACK.lock();

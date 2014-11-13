@@ -61,7 +61,7 @@ public class ActivityRuleConfig extends Activity {
         setContentView(R.layout.config_rule);
         
         mApp = (ServerApp)getApplication();
-        RuleManager.load(this);
+        //RuleManager.load(this);
         createScreen();
     }
 
@@ -99,8 +99,8 @@ public class ActivityRuleConfig extends Activity {
     }
     
     public void onClickCancel(View v) {
-        //finish();
-        RuleManager.evaluate(mApp, null);
+        finish();
+        //RuleManager.evaluate(mApp, null);
     }
     
     
@@ -115,16 +115,11 @@ public class ActivityRuleConfig extends Activity {
         dlgView.setContentView(R.layout.config_rule_time);
         
         final TimePicker tpStart = (TimePicker)dlgView.findViewById(R.id.timePickerStart);
-        final TimePicker tpEnd   = (TimePicker)dlgView.findViewById(R.id.timePickerEnd);
         final RuleInput  rule    = ruleOutput.getRule(rowKey);
         
         tpStart.setIs24HourView(true);
-        tpStart.setCurrentHour(rule.getStartHour());
-        tpStart.setCurrentMinute(rule.getStartMin());
-        
-        tpEnd.setIs24HourView(true);
-        tpEnd.setCurrentHour(rule.getEndHour());
-        tpEnd.setCurrentMinute(rule.getEndMin());
+        tpStart.setCurrentHour(rule.getHour());
+        tpStart.setCurrentMinute(rule.getMinute());
         
         for (int i = 0; i < 7; i++) {
             CheckBox cb = (CheckBox)dlgView.findViewById(R.id.checkBoxSun + i);
@@ -143,8 +138,7 @@ public class ActivityRuleConfig extends Activity {
         btnOK.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                rule.setStartTime(tpStart.getCurrentHour(), tpStart.getCurrentMinute());
-                rule.setEndTime(tpEnd.getCurrentHour(), tpEnd.getCurrentMinute());
+                rule.setTime(tpStart.getCurrentHour(), tpStart.getCurrentMinute());
                 for (int i = 0; i < 7; i++) {
                     CheckBox cb = (CheckBox)dlgView.findViewById(R.id.checkBoxSun + i);
                     rule.setDay(i, cb.isChecked());
@@ -157,8 +151,7 @@ public class ActivityRuleConfig extends Activity {
         dlgView.show();
         return dlgView;
     }
-        
-    
+
     public Dialog onClickThermo(View v, final RuleOutput ruleOutput, final int rowKey, final int id) {
         final Dialog dlgView = new Dialog(this);
         dlgView.setTitle(R.string.config_rule_thermo);
