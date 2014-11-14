@@ -49,6 +49,8 @@ public class ActivityMain extends Activity {
     private static final int ID_NOTICE           = 0x06;
     private static final int ID_QUIT             = 0x07;
     
+    private static final int RULE_REQUEST_CODE     = 1002;
+    
     private ServerApp  app;
     
     // Local Bluetooth adapter
@@ -197,10 +199,23 @@ public class ActivityMain extends Activity {
             LogUtil.e("BT disable !!!!");
         }
     }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        switch(requestCode) {
+            case RULE_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    mService.startRuleChecking();
+                }
+                break;
+        }
+    }
 
     public void onClickRuleConfig(View v) {
         Intent intent = new Intent(this, ActivityRuleConfig.class);
-        startActivity(intent);
+        startActivityForResult(intent, RULE_REQUEST_CODE);
     }
     
     public void onClickServerConfig(View v) {

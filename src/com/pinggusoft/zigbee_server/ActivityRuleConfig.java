@@ -61,7 +61,7 @@ public class ActivityRuleConfig extends Activity {
         setContentView(R.layout.config_rule);
         
         mApp = (ServerApp)getApplication();
-        //RuleManager.load(this);
+        RuleManager.load(this);
         createScreen();
     }
 
@@ -95,12 +95,15 @@ public class ActivityRuleConfig extends Activity {
     
     public void onClickDone(View v) {
         RuleManager.save(this);
+        setResult(RESULT_OK, null);
         finish();
     }
     
     public void onClickCancel(View v) {
-        finish();
-        //RuleManager.evaluate(mApp, null);
+        //finish();
+        RuleManager.getNearestNextTime();
+        setResult(RESULT_CANCELED, null);
+        RuleManager.evaluate(mApp, null);
     }
     
     
@@ -123,7 +126,7 @@ public class ActivityRuleConfig extends Activity {
         
         for (int i = 0; i < 7; i++) {
             CheckBox cb = (CheckBox)dlgView.findViewById(R.id.checkBoxSun + i);
-            cb.setChecked(rule.getDay(i));
+            cb.setChecked(rule.isCheckedDay(i));
         }
         
         final Button btnCancel = (Button)dlgView.findViewById(R.id.buttonCancel);
@@ -141,7 +144,7 @@ public class ActivityRuleConfig extends Activity {
                 rule.setTime(tpStart.getCurrentHour(), tpStart.getCurrentMinute());
                 for (int i = 0; i < 7; i++) {
                     CheckBox cb = (CheckBox)dlgView.findViewById(R.id.checkBoxSun + i);
-                    rule.setDay(i, cb.isChecked());
+                    rule.checkDay(i, cb.isChecked());
                 }
                 ruleOutput.putRule(rowKey, rule);
                 dlgView.dismiss();

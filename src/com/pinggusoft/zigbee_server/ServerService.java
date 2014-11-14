@@ -88,7 +88,7 @@ public class ServerService extends Service {
         mHTTPServer.startThread();
         
         showNotification();
-        //RuleManager.load(this);
+        RuleManager.load(this);
         setAlarm(true);
     }
 
@@ -116,14 +116,11 @@ public class ServerService extends Service {
         intent.setAction(ACTION_CHECK_RULE);
         PendingIntent pi = PendingIntent.getService(this, 0, intent, 0);
         AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        
         alarmManager.cancel(pi);
+        
         if (start) {
-            Calendar calCur = Calendar.getInstance();
-            calCur.setTimeInMillis(System.currentTimeMillis());
-            int sec = calCur.get(Calendar.SECOND);
-            calCur.add(Calendar.SECOND, 60 - sec);
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calCur.getTimeInMillis(), 60 * 1000, pi);
+            long msEvent = RuleManager.getNearestNextTime();
+            alarmManager.set(AlarmManager.RTC_WAKEUP,  msEvent, pi);
         }
     }
     
@@ -135,6 +132,7 @@ public class ServerService extends Service {
             String strAction = intent.getAction();
             if (strAction != null && strAction.equals(ACTION_CHECK_RULE))
                 RuleManager.evaluate(getApplicationContext(), mProbeeHandler);
+                setAlarm(true);
         }
 
         return START_STICKY;
