@@ -169,7 +169,7 @@ public class RuleOutput {
             row.deserialize(byteBuf);
             listRules.put(i, row);
         }
-        LogUtil.d("DONE !!  RULE:%d", nRowKey);
+        LogUtil.d("DONE !!  ID:%x, RULE:%d", nID, nRowKey);
     }
     
     public boolean evaluate(Context ctx) {

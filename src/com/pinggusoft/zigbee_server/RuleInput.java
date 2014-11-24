@@ -220,12 +220,13 @@ public class RuleInput {
                 ret = true;
         } else if (usage == USAGE_TIME) {
             Calendar calCur = Calendar.getInstance();
-            Calendar calSet = calCur;
+            Calendar calSet = (Calendar)calCur.clone();
             int      d = calCur.get(Calendar.DAY_OF_WEEK) - 1;
 
             if (isCheckedDay(d)) {
-                calSet.set(1, 0, 1, getHour(), getMinute());
-                
+                calSet.set(Calendar.HOUR_OF_DAY, getHour());
+                calSet.set(Calendar.MINUTE, getMinute());
+
                 LogUtil.d("SET:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm:ss", calSet)));
                 LogUtil.d("CUR:" + String.valueOf(DateFormat.format("MMM d, EEE. aa h:mm:ss", calCur)));
                 if (calCur.compareTo(calSet) == 0)

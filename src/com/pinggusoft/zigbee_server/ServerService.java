@@ -574,6 +574,7 @@ public class ServerService extends Service {
                     val = (oldVal == 1) ? 0 : 1;
                 }
                 
+                LogUtil.d("WRITE %d to %x", val, id);
                 if (val != oldVal) {
                     Message msgNew = Message.obtain(null, ServerService.CMD_WRITE_GPIO, id, val, node);
                     parent.mMessageManager.offer(msgNew);

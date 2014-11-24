@@ -147,6 +147,7 @@ public class RPCHandler implements HttpRequestHandler {
                 RuleOutput output = new RuleOutput();
                 output.deserialize(buf);
                 RuleManager.put(output.getID(), output);
+                mService.startRuleChecking();
                 return new JSONRPC2Response(output.getID(), req.getID());
             }  else if (req.getMethod().equals("fileRule")) {
                 Map<String, Object> params = req.getNamedParams();
