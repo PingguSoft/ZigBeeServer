@@ -24,22 +24,18 @@
     <string name="main_device_config_desc">원격 디바이스를 설정합니다</string>
     <string name="main_rule_config">룰 편집</string>
     <string name="main_rule_config_desc">룰을 편집합니다</string>
-    
+    <string name="main_service_started">ZigBee Server가 시작됐습니다"</string>
     <string name="main_etc_section">기  타</string>
-    <string name="main_purchase">구  매</string>
-    <string name="main_purchase_desc">어플리케이션을 구매합니다</string>
     <string name="main_notice">알  림</string>
     <string name="main_notice_desc">버전 이력을 보여줍니다</string>
     <string name="main_quit">종  료</string>
     <string name="main_quit_desc">어플리케이션을 종료합니다</string>
-    <string name="main_inapp_fail">구매 오류</string>
-    <string name="main_inapp_auth_fail">검증 실패</string>
-    <string name="main_inapp_success">구매해 주셔서 감사합니다 !</string>
-    <string name="main_inapp_setting_fail">어플리케이션 결제 확인 오류 !</string>
-    <string name="main_inapp_query_fail">어플리케이션 결제 확인 오류 !</string>
-    <string name="main_free_timeout">무료 평가 기간(24시간)이 지났습니다</string>
     <string name="main_authorized">개발자 폰 !!</string>
-    <string name="main_service_started">ZigBee Server가 시작됐습니다"</string>
+    <string name="main_free_timeout">무료 평가 기간(24시간)이 지났습니다</string>
+    <string name="toast_quit">백그라운드로 진행합니다\n서비스 종료는 메뉴상의 종료를 선택하세요</string>
+    <string name="dlg_quit_msg">서버를 종료하시겠습니까?</string>
+    <string name="dlg_yes">네</string>
+    <string name="dlg_no">아니오</string>
 
     <!-- Server Config -->
     <string name="config_server_port">Server Port</string>
@@ -49,7 +45,6 @@
     <string name="config_sel_zigbee">ZigBee 장치 선택</string>
     <string name="config_zigbee_devices">ZigBee 디바이스</string>
     <string name="config_zigbee_scan">스캔</string>
-
     
     <!-- Rule -->
     <string name="config_rule_output">출력 포트</string>
@@ -68,7 +63,7 @@
     <string name="config_rule_time_day_thu">목</string>
     <string name="config_rule_time_day_fri">금</string>
     <string name="config_rule_time_day_sat">토</string>
-    <string name="config_rule_thermo">시간 설정</string>
+    <string name="config_rule_thermo">온도 설정</string>
     <string name="config_rule_thermo_min">최소 온도</string>
     <string name="config_rule_thermo_max">최대 온도</string>    
     <string name="config_rule_done">완 료</string>
@@ -96,17 +91,7 @@
     <string name="zigbee_gpio_mode">MODE</string>
     <string name="zigbee_gpio_name">NAME</string>
     <string name="zigbee_gpio_usage">USAGE</string>
-    
-    <!--  TTS -->
-    <string name="tts_data_err">"데이터 전송 에러"</string>
-    <string name="tts_aux">"억스"</string>
-    <string name="tts_batt_warn1">"배터리 1단계 경고"</string>
-    <string name="tts_batt_warn2">"배터리 2단계 경고"</string>
-    <string name="tts_batt_crit">"배터리 위험"</string>
-    <string name="tts_arm">"시동 걸림"</string>
-    <string name="tts_disarm">"시동 꺼짐"</string>
-    
-    
+        
     <string name="main_client">Client</string>
     
 </resources>

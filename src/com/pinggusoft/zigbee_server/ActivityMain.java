@@ -20,9 +20,11 @@ import com.pinggusoft.listitem.SectionItem;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -30,6 +32,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
@@ -63,6 +67,8 @@ public class ActivityMain extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LogUtil.initialize(this);
+        
         app =  (ServerApp)getApplication();
         setContentView(R.layout.main_list_view);
 
@@ -126,11 +132,8 @@ public class ActivityMain extends Activity {
                         break;
                         
                     case ID_QUIT:
-                        mService.stopHTTP();
-                        mService.unbind();
-                        onClickQuit(null);
+                        doQuit();
                         break;
-                        
                         
                     case ID_TEST:
                         break;
@@ -150,6 +153,40 @@ public class ActivityMain extends Activity {
             return;
         }
     }
+    
+    
+    public void doQuit() {
+        final DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    if (mService != null) {
+                        mService.stopHTTP();
+                        mService.unbind();
+                    }
+                    finish();
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(getString(R.string.dlg_quit_msg));
+        builder.setPositiveButton(getString(R.string.dlg_yes), dialogClickListener);
+        builder.setNegativeButton(getString(R.string.dlg_no), dialogClickListener);
+        
+        AlertDialog dialog = builder.show();
+        TextView v = (TextView)dialog.findViewById(android.R.id.message);
+        if(v != null) 
+            v.setGravity(Gravity.CENTER);
+        dialog.show();
+    }
+    
     
     @Override
     public void onStart() {
@@ -175,13 +212,6 @@ public class ActivityMain extends Activity {
     public synchronized void onResume() {
         super.onResume();
         LogUtil.e("onResume");
-        if (ServerApp.isAboveICS()) {
-            ActionBar bar = getActionBar();
-            bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#222222")));
-            int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
-            TextView abTitle = (TextView) findViewById(titleId);
-            abTitle.setTextColor(Color.WHITE);
-        }
     }
     
     @Override
@@ -256,31 +286,22 @@ public class ActivityMain extends Activity {
         mDialog.show();
     }
 
-    public void onClickQuit(View v) {
-        finish();
-    }    
-    
-    void complain(String strMsg) {
-        LogUtil.e(strMsg);
-        alert(strMsg);
-    }
-    
-    void complain(int nResID) {
-        String strMsg = getResources().getString(nResID);
-        
-        LogUtil.e(strMsg);
-        alert(strMsg);
-    }
-
-    void alert(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-    
     void alert(int nResID) {
         String strMsg = getResources().getString(nResID);
-        Toast.makeText(this, strMsg, Toast.LENGTH_SHORT).show();
+        Toast t = Toast.makeText(this, strMsg, Toast.LENGTH_SHORT);
+        TextView v = (TextView)t.getView().findViewById(android.R.id.message);
+        if(v != null) 
+            v.setGravity(Gravity.CENTER);
+        t.show();
     }
     
+    void alert(String message) {
+        Toast t = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        TextView v = (TextView)t.getView().findViewById(android.R.id.message);
+        if(v != null) 
+            v.setGravity(Gravity.CENTER);
+        t.show();
+    }
     
     public int findItemPosbyId(int id) {
         int pos = 0;
@@ -356,5 +377,16 @@ public class ActivityMain extends Activity {
             
             }
         }
+    }
+    
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+        case KeyEvent.KEYCODE_BACK:
+            alert(R.string.toast_quit);
+            moveTaskToBack(true);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }
