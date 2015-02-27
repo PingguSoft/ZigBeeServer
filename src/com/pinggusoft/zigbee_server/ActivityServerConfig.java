@@ -74,14 +74,6 @@ public class ActivityServerConfig extends Activity {
     public synchronized void onResume() {
         super.onResume();
         
-        if (ServerApp.isAboveICS()) {
-            ActionBar bar = getActionBar();
-            bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#222222")));
-            int titleId = getResources().getIdentifier("action_bar_title", "id", "android");
-            TextView abTitle = (TextView) findViewById(titleId);
-            abTitle.setTextColor(Color.WHITE);
-        }
-        
         mTextBTAddr.setText(mApp.getBTDevice());
         ((EditText)findViewById(R.id.editServerPort)).setText(String.valueOf(mApp.getServerPort()));
     }

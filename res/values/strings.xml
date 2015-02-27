@@ -16,106 +16,82 @@
     <string name="none_paired">No devices have been paired</string>
     <string name="none_found">No devices found</string>
 
-   
     <!-- main -->
     <string name="main_btcon_config_section">Settings</string>
-    <string name="main_server_config">BTCon Settings</string>
-    <string name="main_server_config_desc">Configure application settings</string>
-    <string name="main_device_config">MultiWii Settings</string>
-    <string name="main_device_config_desc">Configure MultiWii parameters</string>
-    <string name="main_agps_config">u-blox AssistNow Online</string>
-    <string name="main_agps_config_desc">Injecting AGPS data to u-blox GPS module</string>
-
-    <string name="main_bt_controller_section">Controller &amp; Station</string>
-    <string name="main_bt_controller">Controller</string>
-    <string name="main_bt_controller_desc">Launch controller</string>
-    <string name="main_bt_station">Station (Monitoring)</string>
-    <string name="main_bt_station_desc">Launch station</string>
-
-    <string name="main_bt_robot_controller">Robot Controller</string>
-
+    <string name="main_server_config">Server settings</string>
+    <string name="main_server_config_desc">Configure server environment</string>
+    <string name="main_device_config">Remote device settings</string>
+    <string name="main_device_config_desc">Configure remote devices</string>
+    <string name="main_rule_config">Rules</string>
+    <string name="main_rule_config_desc">Edit rules</string>
+    <string name="main_service_started">ZigBee Server is started</string>
     <string name="main_etc_section">ETCs</string>
-    <string name="main_purchase">Purchase</string>
-    <string name="main_purchase_desc">Purchasing application</string>
     <string name="main_notice">Notice</string>
     <string name="main_notice_desc">Show application change history</string>
     <string name="main_quit">QUIT</string>
     <string name="main_quit_desc">Finish the application</string>
-    <string name="main_inapp_fail">Error purchasing</string>
-    <string name="main_inapp_auth_fail">Authenticity verification failed</string>
-    <string name="main_inapp_success">Thank you for purchasing !</string>
-    <string name="main_inapp_setting_fail">Problem setting up in-app billing !</string>
-    <string name="main_inapp_query_fail">Failed to query inventory !</string>
-    <string name="main_free_timeout">Free evaluation period (24h) is expired</string>
     <string name="main_authorized">Developer Phone !!</string>
+    <string name="main_free_timeout">Free evaluation period (24h) is expired</string>
+    <string name="toast_quit">Service is running in background\nPress Quit to terminate service</string>
+    <string name="dlg_quit_msg">Are you sure to terminate Server?</string>
+    <string name="dlg_yes">YES</string>
+    <string name="dlg_no">NO</string>
 
-    <!-- BTCon Config -->
-    <string name="config_bt_zigbee_combo">Bluetooth</string>
+    <!-- Server Config -->
+    <string name="config_server_port">Server Port</string>
+    <string name="config_bt_zigbee_combo">Bluetooth ZigBee Combo</string>
     <string name="config_selBT">Select Bluetooth device</string>
-    <string name="config_option">Receiver Radio Option</string>
-    <string name="config_rcvr_bt_only">Bluetooth Only</string>
-    <string name="config_rcvr_bt_10">BT9M, BT10 (Interboard bluetooth receiver)</string>
-    <string name="config_rcvr_zigbee">ZigBee (Probee20S)</string>
-    <string name="config_zigbee">ZigBee</string>
+    <string name="config_zigbee">ZigBee settings</string>
     <string name="config_sel_zigbee">Select ZigBee device</string>
-    <string name="config_com_test">Communication Test</string>
-    <string name="config_cell">Battery Cell</string>
-    <string name="config_sensor_sensitivity">Sensor Sensitivity</string>
-    <string name="config_zigbee_devices">Scanned ZigBee Devices</string>
-    <string name="config_zigbee_scan">Click for scanning</string>
-    <string name="config_mode">Mode</string>
-    <string name="config_mode_controller">Controller</string>
-    <string name="config_mode_station">Station (Monitoring)</string>
+    <string name="config_zigbee_devices">ZigBee devices</string>
+    <string name="config_zigbee_scan">SCAN</string>
     
-
+    <!-- Rule -->
+    <string name="config_rule_output">Output Port</string>
+    <string name="config_rule_operation">Operation</string>
+    <string name="config_rule_input">Input</string>
+    <string name="config_rule_condition">Conditions</string>
+    <string name="config_rule_operator">Operator</string>
+    <string name="config_rule_input_time">Time</string>
+    <string name="config_rule_time">Time setting</string>
+    <string name="config_rule_time_set">Working time</string>
+    <string name="config_rule_time_days">DOW</string>
+    <string name="config_rule_time_day_sun">SU</string>
+    <string name="config_rule_time_day_mon">MO</string>
+    <string name="config_rule_time_day_tue">TU</string>
+    <string name="config_rule_time_day_wed">WE</string>
+    <string name="config_rule_time_day_thu">TH</string>
+    <string name="config_rule_time_day_fri">FR</string>
+    <string name="config_rule_time_day_sat">SA</string>
+    <string name="config_rule_thermo">Thermo Setting</string>
+    <string name="config_rule_thermo_min">Min</string>
+    <string name="config_rule_thermo_max">Max</string>    
+    <string name="config_rule_done">DONE</string>
+    <string name="config_rule_cancel">CANCEL</string>
+    <string name="config_rule_action_off">OFF</string>
+    <string name="config_rule_action_on">ON</string>
+    <string name="config_rule_action_toggle">TOGGLE</string>
+   
+    
     <!-- Bluetooth Config -->
-    <string name="bt_config_paired_devices">Paired Devices</string>
-    <string name="bt_config_other_devices">Other Available Devices</string>
-    <string name="bt_config_scan">Click for scanning</string>    
+    <string name="bt_config_paired_devices">Pared devices</string>
+    <string name="bt_config_other_devices">Scanned devices</string>
+    <string name="bt_config_scan">SCAN</string>
     
-    <!-- MultiWii Config -->
-    <string name="multiwii_rc_tuning">RC Tuning (0.0 ~ 1.0)</string>
-    <string name="multiwii_rc_rate">RC Rate</string>
-    <string name="multiwii_rc_expo">RC Expo</string>
-    <string name="multiwii_thr_mid">Thr Mid</string>
-    <string name="multiwii_thr_expo">Thr Expo</string>
-    <string name="multiwii_throttle">Throttle (1000 ~ 2000)</string>
-    <string name="multiwii_thr_min">Min</string>
-    <string name="multiwii_thr_max">Max</string>
-    <string name="multiwii_thr_fail_safe">FailSafe</string>
-    <string name="multiwii_save">Save</string>
-    <string name="multiwii_battery">Battery Settings</string>
-    <string name="multiwii_battery_scale">Scale</string>
-    <string name="multiwii_battery_warn1">Warning 1</string>
-    <string name="multiwii_battery_warn2">Warning 2</string>
-    <string name="multiwii_battery_critical">Critical</string>
-    <string name="multiwii_battery_voltage">Current Voltage</string>
-    <string name="multiwii_aux">AUX Settings</string>
-    
-    <!-- u-blox AGPS Config -->
-    <string name="config_ublox_ano">GPS - ublox AssistNow Online</string>
-    <string name="config_ublox_inject">Click for injecting</string>
-    <string name="config_ublox_id">ID</string>
-    <string name="config_ublox_enter_id">Enter ID</string>
-    <string name="config_ublox_password">Password</string>
-    <string name="config_ublox_enter_password">Enter Password</string>
-    <string name="config_ublox_error_server">ERROR !!\nublox ActiveNowOnline Server Error\nCheck ID &amp; Password</string>
-    <string name="config_ublox_rx_done">AGPS data download successful\nStart injecting..</string>
-    <string name="config_ublox_inject_done">Injection completed !!</string>
-    <string name="config_ublox_turn_loc_on">Location service is not on\nTurn it on !!</string>
+    <!-- ZigBee Config -->
+    <string name="zigbee_read_node">Read Node</string>
+    <string name="zigbee_write_node">Write Node</string>
+    <string name="zigbee_node">ZigBee Node settings</string>
+    <string name="zigbee_node_name">Node Name</string>
+    <string name="zigbee_node_type">Node Type</string>
+    <string name="zigbee_node_addr">Node Addr</string>
+    <string name="zigbee_gpio">ZigBee GPIO settings</string>
+    <string name="zigbee_gpio_no">GPIO</string>
+    <string name="zigbee_gpio_pin">PIN</string>
+    <string name="zigbee_gpio_mode">MODE</string>
+    <string name="zigbee_gpio_name">NAME</string>
+    <string name="zigbee_gpio_usage">USAGE</string>
+        
+    <string name="main_client">Client</string>
 
-    <!-- BT Controller -->
-    <string name="btn_trim">TRIM</string>
-    <string name="btn_cal_acc">CAL_ACC</string>
-    <string name="btn_cal_mag">CAL_MAG</string>
-    <string name="btn_hold">THR_HOLD</string>
-    
-    <!--  TTS -->
-    <string name="tts_data_err">"Data Error"</string>
-    <string name="tts_aux">"Auxil"</string>
-    <string name="tts_batt_warn1">"Battery Warning 1"</string>
-    <string name="tts_batt_warn2">"Battery Warning 2"</string>
-    <string name="tts_batt_crit">"Battery Critical"</string>
-    <string name="tts_arm">"Armed"</string>
-    <string name="tts_disarm">"Disarmed"</string>
 </resources>
