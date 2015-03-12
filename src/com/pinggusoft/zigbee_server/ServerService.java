@@ -105,8 +105,7 @@ public class ServerService extends Service {
         final Notification notification = builder.build();
         
         mNotifyManager.notify(NOTIFICATION_STARTED_ID, notification);
-        
-        //startForeground(1, notification);
+        startForeground(1, notification);
     }
     
     private final static String ACTION_CHECK_RULE = "action_check_rule";
